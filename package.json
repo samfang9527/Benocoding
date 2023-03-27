@@ -1,0 +1,24 @@
+{
+  "name": "benocoding",
+  "version": "1.0.0",
+  "description": "Appworks personal project",
+  "type": "module",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/samfang9527/Benocoding.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/samfang9527/Benocoding/issues"
+  },
+  "homepage": "https://github.com/samfang9527/Benocoding#readme",
+  "dependencies": {
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2"
+  }
+}
