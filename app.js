@@ -16,3 +16,7 @@ app.listen(port, () => {
 })
 
 
+app.use((req, res) => {
+    console.log(`404: ${req.path}`);
+    res.status(404).json('page not found');
+})
