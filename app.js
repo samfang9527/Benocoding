@@ -5,7 +5,16 @@ import { expressMiddleware } from "@apollo/server/express4";
 import { ApolloServerPluginDrainHttpServer } from "@apollo/server/plugin/drainHttpServer";
 import http from "http";
 import cors from "cors";
-import { typeDefs, resolvers } from "./schema.js";
+import { DB } from "./models/database.js";
+
+// typeDefs
+import { typeDefs as userTypeDefs } from "./typeDefs/userTypeDefs.js";
+import { typeDefs as classTypeDefs } from "./typeDefs/classTypeDefs.js";
+
+// resolvers
+import { resolvers as userResolvers } from "./resolvers/userResolver.js";
+import { resolvers as classResolvers } from "./resolvers/classResolver.js";
+
 
 dotenv.config();
 
@@ -14,8 +23,8 @@ const port = process.env.MAIN_SERVER_PORT;
 
 const httpServer = http.createServer(app);
 const server = new ApolloServer({
-    typeDefs,
-    resolvers,
+    typeDefs: [userTypeDefs, classTypeDefs],
+    resolvers: [userResolvers, classResolvers],
     plugins: [ApolloServerPluginDrainHttpServer( { httpServer } )]
 });
 
