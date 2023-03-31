@@ -1,10 +1,17 @@
 
 const typeDefs = `#graphql
+
+    type ClassInfo {
+        classId: String
+        className: String
+    }
+
     type User {
         id: String
         username: String
         email: String
         password: String
+        class: [ClassInfo]
     }
 
     type Query {

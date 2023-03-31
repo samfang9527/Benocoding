@@ -1,11 +1,11 @@
 
 import { Class } from "./database.js";
 
-async function getClassList() {
-    const data = await Class.find();
+async function getClass(classId) {
+    const data = await Class.findById(classId);
     return data;
 }
 
 export {
-    getClassList
+    getClass
 }

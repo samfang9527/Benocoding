@@ -7,9 +7,13 @@ const classSchema = mongoose.Schema({
         minLength: [1, 'classname can\'t be smaller than 1 characters'],
         maxLength: [16, 'classname can\'t be greater than 16 characters']
     },
-    teacherName: {
+    teacherList: {
         type: [String],
         required: [true, 'teacherName is required'],
+        default: []
+    },
+    studentsList: {
+        type: [String],
         default: []
     },
     classDesc: {
@@ -43,7 +47,9 @@ const classSchema = mongoose.Schema({
             default: false
         },
         milestoneAutoTestCode: String
-    }]
+    }],
+    classTeacherOptions: [String],
+    classStudentOptions: [String]
 
 }, { collection: 'class' } );
 

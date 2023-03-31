@@ -28,8 +28,9 @@ const typeDefs = `#graphql
     }
 
     type Class {
+        _id: String
         className: String
-        teacherName: String
+        teacherList: [String]
         classDesc: String
         classTags: [String]
         maxStudentsNumber: Int
@@ -37,10 +38,13 @@ const typeDefs = `#graphql
         classStartDate: Date
         classEndDate: Date
         classMilestones: [Milestone]
+        classTeacherOptions: [String]
+        classStudentOptions: [String]
     }
 
     type Query {
-        classes: [Class]
+        classes: [Class],
+        class(classId: String!): Class
     }
 `;
 

@@ -20,9 +20,10 @@ const userSchema = mongoose.Schema({
         minLength: [8, 'password can\'t be smaller than 8 characters'],
         maxLength: [20, 'password can\'t be greater than 20 characters']
     },
-    class: {
-        type: [String]
-    }
+    class: [{
+        classId: String,
+        className: String
+    }]
 }, { collection: 'users' } );
 
 export { userSchema };

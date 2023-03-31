@@ -1,11 +1,14 @@
 
-import { getClassList } from "../models/classModel.js";
+import {
+    getClass
+} from "../models/classModel.js";
 
 const resolvers = {
     Query: {
-        classes: async () => {
-            const infos = await getClassList();
-            return infos;
+        class: async (_, args, context) => {
+            const { classId } = args;
+            const info = await getClass(classId);
+            return info;
         }
     }
 };

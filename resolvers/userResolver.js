@@ -1,4 +1,6 @@
 
+import { User } from "../models/database.js";
+
 const resolvers = {
     Query: {
         me: async (_, { id }, context) => {
