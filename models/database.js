@@ -1,7 +1,9 @@
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 import { userSchema } from "./schemas/userSchema.js";
-import { classSchema } from "./schemas/classSchema.js";
+import { classInfoSchema } from "./schemas/classInfoSchema.js";
+import { userClassInfoSchema } from "./schemas/userClassInfoSchema.js";
+import { chatroomSchema } from "./schemas/chatroomSchema.js";
 
 dotenv.config();
 
@@ -18,11 +20,15 @@ mongoose.connect(
 .then(() => console.log('MongoDB connected'))
 .catch(err => console.error(err))
 
-const User = mongoose.model('User', userSchema);
-const Class = mongoose.model('Class', classSchema);
+const User = mongoose.model('user', userSchema);
+const ClassInfo = mongoose.model('classInfo', classInfoSchema);
+const UserClassInfo = mongoose.model('userClassInfo', userClassInfoSchema);
+const Chatroom = mongoose.model('chatroom', chatroomSchema);
 
 export {
     mongoose as DB,
     User,
-    Class
+    ClassInfo,
+    UserClassInfo,
+    Chatroom
 };

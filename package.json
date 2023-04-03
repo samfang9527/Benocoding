@@ -19,11 +19,13 @@
   "homepage": "https://github.com/samfang9527/Benocoding#readme",
   "dependencies": {
     "@apollo/server": "^4.5.0",
+    "aws-sdk": "^2.1348.0",
     "cors": "^2.8.5",
     "dotenv": "^16.0.3",
     "express": "^4.18.2",
     "graphql": "^16.6.0",
     "http": "^0.0.1-security",
-    "mongoose": "^7.0.3"
+    "mongoose": "^7.0.3",
+    "socket.io": "^4.6.1"
   }
 }

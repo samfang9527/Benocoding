@@ -17,13 +17,14 @@ const userSchema = mongoose.Schema({
     password: {
         type: String,
         require: [true, 'password is required'],
-        minLength: [8, 'password can\'t be smaller than 8 characters'],
-        maxLength: [20, 'password can\'t be greater than 20 characters']
     },
     class: [{
         classId: String,
-        className: String
-    }]
+        className: String,
+        role: String,
+        githubAccessToken: String
+    }],
+    tags: [String]
 }, { collection: 'users' } );
 
 export { userSchema };

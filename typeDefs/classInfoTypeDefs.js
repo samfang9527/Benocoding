@@ -23,21 +23,20 @@ const typeDefs = `#graphql
     type Milestone {
         milestone: String
         milestoneDesc: String
-        passed: Boolean
-        milestoneAutoTestCode: String
+        video: String
+        autoTest: String
     }
 
     type Class {
-        _id: String
+        id: String
         className: String
-        teacherList: [String]
         classDesc: String
-        classTags: [String]
-        maxStudentsNumber: Int
-        minStudentsNumber: Int
+        teacherName: String
         classStartDate: Date
         classEndDate: Date
-        classMilestones: [Milestone]
+        classImage: String
+        classTags: [String]
+        milestones: [Milestone]
         classTeacherOptions: [String]
         classStudentOptions: [String]
     }

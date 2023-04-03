@@ -4,6 +4,8 @@ const typeDefs = `#graphql
     type ClassInfo {
         classId: String
         className: String
+        role: String
+        githubAccessToken: String
     }
 
     type User {

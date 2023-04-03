@@ -5,26 +5,42 @@ import { expressMiddleware } from "@apollo/server/express4";
 import { ApolloServerPluginDrainHttpServer } from "@apollo/server/plugin/drainHttpServer";
 import http from "http";
 import cors from "cors";
+import { Server } from "socket.io";
 import { DB } from "./models/database.js";
 
 // typeDefs
 import { typeDefs as userTypeDefs } from "./typeDefs/userTypeDefs.js";
-import { typeDefs as classTypeDefs } from "./typeDefs/classTypeDefs.js";
+import { typeDefs as classInfoTypeDefs } from "./typeDefs/classInfoTypeDefs.js";
 
 // resolvers
 import { resolvers as userResolvers } from "./resolvers/userResolver.js";
-import { resolvers as classResolvers } from "./resolvers/classResolver.js";
+import { resolvers as classInfoResolvers } from "./resolvers/classInfoResolver.js";
 
 
 dotenv.config();
 
+// express
 const app = express();
 const port = process.env.MAIN_SERVER_PORT;
-
 const httpServer = http.createServer(app);
+
+// socket.io
+const io = new Server(httpServer, {
+    cors: 'http://localhost:8080'
+});
+
+io.on('connection', (socket) => {
+    console.log('a user connected');
+    socket.on('newMessage', (message) => {
+        console.log(message);
+        io.emit('update', message.message);
+    })
+});
+
+// Apollo server for graphQL
 const server = new ApolloServer({
-    typeDefs: [userTypeDefs, classTypeDefs],
-    resolvers: [userResolvers, classResolvers],
+    typeDefs: [userTypeDefs, classInfoTypeDefs],
+    resolvers: [userResolvers, classInfoResolvers],
     plugins: [ApolloServerPluginDrainHttpServer( { httpServer } )]
 });
 

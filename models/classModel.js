@@ -1,8 +1,8 @@
 
-import { Class } from "./database.js";
+import { ClassInfo } from "./database.js";
 
 async function getClass(classId) {
-    const data = await Class.findById(classId);
+    const data = await ClassInfo.findById(classId);
     return data;
 }
 
