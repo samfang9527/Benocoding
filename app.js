@@ -7,6 +7,7 @@ import http from "http";
 import cors from "cors";
 import { Server } from "socket.io";
 import { DB } from "./models/database.js";
+import { generateUploadURL } from "./utils/s3.js";
 
 // typeDefs
 import { typeDefs as userTypeDefs } from "./typeDefs/userTypeDefs.js";
@@ -15,7 +16,6 @@ import { typeDefs as classInfoTypeDefs } from "./typeDefs/classInfoTypeDefs.js";
 // resolvers
 import { resolvers as userResolvers } from "./resolvers/userResolver.js";
 import { resolvers as classInfoResolvers } from "./resolvers/classInfoResolver.js";
-
 
 dotenv.config();
 
@@ -46,18 +46,22 @@ const server = new ApolloServer({
 
 await server.start();
 
+app.use(cors());
+app.use(express.json());
+
 app.use(
     '/graphql',
-    cors(),
-    express.json(),
     expressMiddleware(server, {
         context: async ({ req }) => ({ token: req.headers.token }),
     })
 );
 
-app.use('/', (req, res) => {
-    console.log('express is still working');
-    res.status(200).json('ok');
+// for file upload
+app.post('/fileUpload', async (req, res) => {
+    const { fileExtension} = req.body;
+    const url = await generateUploadURL(fileExtension);
+    console.log(url);
+    return res.status(200).json(url);
 })
 
 await new Promise((resolve) => httpServer.listen({ port: port }, resolve));
