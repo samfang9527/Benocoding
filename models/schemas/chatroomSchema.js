@@ -13,6 +13,6 @@ const chatroomSchema = mongoose.Schema({
         message: String
     }],
     members: [String]
-});
+}, { collection: 'chatrooms' });
 
 export { chatroomSchema };
