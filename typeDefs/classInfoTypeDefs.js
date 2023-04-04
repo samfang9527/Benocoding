@@ -35,15 +35,39 @@ const typeDefs = `#graphql
         classStartDate: Date
         classEndDate: Date
         classImage: String
+        classVideo: String
         classTags: [String]
         milestones: [Milestone]
         classTeacherOptions: [String]
         classStudentOptions: [String]
     }
 
+    input MilestoneData {
+        milestone: String
+        milestoneDesc: String
+        autoTest: String
+    }
+
+    input InputData {
+        ownerId: String
+        className: String
+        classDesc: String
+        teacherName: String
+        classStartDate: Date
+        classEndDate: Date
+        classImage: String
+        classVideo: String
+        classTags: [String]
+        milestones: [MilestoneData]
+    }
+
     type Query {
         classes: [Class],
         class(classId: String!): Class
+    }
+
+    type Mutation {
+        createClass(data: InputData!): Class
     }
 `;
 

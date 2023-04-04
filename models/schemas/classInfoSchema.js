@@ -28,6 +28,7 @@ const classInfoSchema = mongoose.Schema({
         required: [true, 'start date is required']
     },
     classImage: String,
+    classVideo: String,
     classTags: {
         type: [String],
         default: []

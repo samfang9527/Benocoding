@@ -64,6 +64,13 @@ app.post('/fileUpload', async (req, res) => {
     return res.status(200).json(url);
 })
 
+app.post('/test', (req, res) => {
+    const { body } = req;
+    console.log(body);
+    res.status(200).send('ok');
+})
+
+
 await new Promise((resolve) => httpServer.listen({ port: port }, resolve));
 console.log(`🚀 Server ready at http://localhost:${port}/graphql`);
 
