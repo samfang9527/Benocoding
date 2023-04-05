@@ -25,9 +25,11 @@ const typeDefs = `#graphql
         milestoneDesc: String
         video: String
         autoTest: String
+        passed: Boolean
     }
 
     type Class {
+        ownerId: String
         id: String
         className: String
         classDesc: String
@@ -38,14 +40,15 @@ const typeDefs = `#graphql
         classVideo: String
         classTags: [String]
         milestones: [Milestone]
-        classTeacherOptions: [String]
-        classStudentOptions: [String]
+        teacherOptions: [String]
+        studentOptions: [String]
     }
 
     input MilestoneData {
         milestone: String
         milestoneDesc: String
         autoTest: String
+        passed: Boolean
     }
 
     input InputData {
@@ -59,6 +62,10 @@ const typeDefs = `#graphql
         classVideo: String
         classTags: [String]
         milestones: [MilestoneData]
+        teacherOptions: [String]
+        studentOptions: [String]
+        studentNumbers: Int
+        status: Boolean
     }
 
     type Query {

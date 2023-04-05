@@ -43,7 +43,8 @@ const classInfoSchema = mongoose.Schema({
             maxLength: [128, 'milestone description can\'t be greater than 128 characters']
         },
         video: String,
-        autoTest: String
+        autoTest: String,
+        passed: Boolean
     }],
     teacherOptions: [String],
     studentOptions: [String],

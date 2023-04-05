@@ -12,6 +12,8 @@ const chatroomSchema = mongoose.Schema({
         },
         message: String
     }],
+    classId: String,
+    ownerId: String,
     members: [String]
 }, { collection: 'chatrooms' });
 

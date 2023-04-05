@@ -18,9 +18,7 @@ const s3 = new S3Client({
         accessKeyId: accessKey,
         secretAccessKey: secretAccessKey,
     },
-    signatureVersion: 'v4',
-    maxPartSize: 10 * 1024 * 1024,
-    multipartUploadSize: 30 * 10 * 1024 * 1024
+    signatureVersion: 'v4'
 })
 
 export async function generateUploadURL(fileExtension) {
