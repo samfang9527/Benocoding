@@ -73,7 +73,13 @@ const resolvers = {
                     console.log('userClassInfoResult', userClassInfoResult);
 
                     // update user info
-                    const userResult = await addUserClass(newData.ownerId, classResult._id, newData.classTags);
+                    const classData = {
+                        classId: classResult._id,
+                        className: classResult.className,
+                        role: "teacher",
+                        githubAccessToken: process.env.GITHUB_ACCESS_TOKEN
+                    }
+                    const userResult = await addUserClass(newData.ownerId, classData, newData.classTags);
                     console.log('userResult', userResult);
                 })
                 

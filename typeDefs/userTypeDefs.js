@@ -14,6 +14,7 @@ const typeDefs = `#graphql
         email: String
         password: String
         class: [ClassInfo]
+        tags: [String]
     }
 
     type Query {
