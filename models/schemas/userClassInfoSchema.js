@@ -9,10 +9,6 @@ const userClassInfoSchema = mongoose.Schema({
         type: String,
         required: [true, 'classId is required']
     },
-    chatroomId: {
-        type: String,
-        required: [true, 'chatroomId is required']
-    },
     ownerId: {
         type: String,
         required: [true, 'ownerId is required']
@@ -56,7 +52,9 @@ const userClassInfoSchema = mongoose.Schema({
         video: String,
         autoTest: String,
         passed: Boolean
-    }]
+    }],
+    teacherOptions: [String],
+    studentOptions: [String]
 }, { collection: 'userClassInfos' } );
 
 export { userClassInfoSchema };

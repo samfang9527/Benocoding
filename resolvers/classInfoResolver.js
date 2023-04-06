@@ -6,7 +6,6 @@ import {
 } from "../models/userModel.js";
 
 import {
-    getClass,
     createClassInfo
 } from "../models/classModel.js";
 
@@ -15,14 +14,15 @@ import {
 } from "../models/chatroomModel.js";
 
 import {
-    createUserClassInfo
+    createUserClassInfo,
+    getUserClassData
 } from "../models/userClassModel.js";
 
 const resolvers = {
     Query: {
         class: async (_, args, context) => {
             const { classId } = args;
-            const info = await getClass(classId);
+            const info = await getUserClassData(classId);
             return info;
         }
     },
@@ -47,44 +47,48 @@ const resolvers = {
             try {
                 await session.withTransaction(async () => {
 
-                    // create general class info
-                    const classResult = await createClassInfo(newData);
-                    console.log('classResult', classResult);
+                    try {
+                        // create chatroom
+                        const chatroomResult = await createChatroom({
+                            messages: [],
+                            ownerId: newData.ownerId,
+                            members: [newData.ownerId]
+                        })
+                        console.log('chatroomResult', chatroomResult);
 
-                    // create chatroom
-                    const chatroomResult = await createChatroom({
-                        messages: [],
-                        classId: classResult._id,
-                        ownerId: classResult.ownerId,
-                        members: [classResult.ownerId]
-                    })
-                    console.log('chatroomResult', chatroomResult);
+                        // create general class info
+                        const classResult = await createClassInfo({...newData, chatroomId: chatroomResult._id});
+                        console.log('classResult', classResult);
 
-                    // create user class info
-                    const userClassInfoData = {
-                        ...data,
-                        userId: classResult.ownerId,
-                        classId: classResult._id,
-                        chatroomId: chatroomResult._id,
-                        ownerId: classResult.ownerId,
-                        teacherOptions
+                        // create user class info
+                        const userClassInfoData = {
+                            ...data,
+                            userId: classResult.ownerId,
+                            classId: classResult._id,
+                            ownerId: classResult.ownerId,
+                            teacherOptions
+                        }
+                        const userClassInfoResult = await createUserClassInfo(userClassInfoData);
+                        console.log('userClassInfoResult', userClassInfoResult);
+
+                        // update user info
+                        const classData = {
+                            classId: userClassInfoResult._id,
+                            className: classResult.className,
+                            role: "teacher",
+                            githubAccessToken: process.env.GITHUB_ACCESS_TOKEN
+                        }
+                        const userResult = await addUserClass(newData.ownerId, classData, newData.classTags);
+                        console.log('userResult', userResult);
+
+                        await session.commitTransaction();
+
+                    } catch (err) {
+                        console.error(err);
+                        return await session.abortTransaction();
                     }
-                    const userClassInfoResult = await createUserClassInfo(userClassInfoData);
-                    console.log('userClassInfoResult', userClassInfoResult);
-
-                    // update user info
-                    const classData = {
-                        classId: classResult._id,
-                        className: classResult.className,
-                        role: "teacher",
-                        githubAccessToken: process.env.GITHUB_ACCESS_TOKEN
-                    }
-                    const userResult = await addUserClass(newData.ownerId, classData, newData.classTags);
-                    console.log('userResult', userResult);
                 })
-                
                 return newData;
-
             } catch (err) {
                 console.error(err);
             } finally {
