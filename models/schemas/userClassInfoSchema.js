@@ -54,7 +54,8 @@ const userClassInfoSchema = mongoose.Schema({
         passed: Boolean
     }],
     teacherOptions: [String],
-    studentOptions: [String]
+    studentOptions: [String],
+    chatroomId: String
 }, { collection: 'userClassInfos' } );
 
 export { userClassInfoSchema };

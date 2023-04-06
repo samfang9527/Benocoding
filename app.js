@@ -24,19 +24,6 @@ const app = express();
 const port = process.env.MAIN_SERVER_PORT;
 const httpServer = http.createServer(app);
 
-// socket.io
-const io = new Server(httpServer, {
-    cors: 'http://localhost:8080'
-});
-
-io.on('connection', (socket) => {
-    console.log('a user connected');
-    socket.on('newMessage', (message) => {
-        console.log(message);
-        io.emit('update', message.message);
-    })
-});
-
 // Apollo server for graphQL
 const server = new ApolloServer({
     typeDefs: [userTypeDefs, classInfoTypeDefs],
@@ -46,8 +33,12 @@ const server = new ApolloServer({
 
 await server.start();
 
+await new Promise((resolve) => httpServer.listen({ port: port }, resolve));
+console.log(`🚀 Server ready at http://localhost:${port}/graphql`);
+
 app.use(cors());
 app.use(express.json());
+app.use(express.static('public'));
 
 app.use(
     '/graphql',
@@ -70,13 +61,50 @@ app.post('/test', (req, res) => {
     res.status(200).send('ok');
 })
 
-
-await new Promise((resolve) => httpServer.listen({ port: port }, resolve));
-console.log(`🚀 Server ready at http://localhost:${port}/graphql`);
-
-app.use(express.static('public'));
-
 app.use((req, res) => {
     console.log(`404: ${req.path}`);
     res.status(404).json('page not found');
 })
+
+// socket.io
+const io = new Server(httpServer, {
+    cors: 'http://localhost:8080'
+});
+
+const chatroomObject = {};
+const sockeToChatroomObj = {};
+
+io.on('connection', (socket) => {
+    console.log('a user connected');
+
+    socket.on('newMessage', (message) => {
+        console.log(chatroomObject);
+        console.log(sockeToChatroomObj);
+        const chatroomId = sockeToChatroomObj[socket.id];
+        const chatroomMembers = chatroomObject[chatroomId];
+        chatroomMembers.forEach((socketId) => {
+            io.to(socketId).emit('update', message.message);
+        })
+    })
+
+    socket.on('joinChatroom', (chatroomId) => {
+        if ( !chatroomObject.hasOwnProperty(chatroomId) ) {
+            chatroomObject[chatroomId] = new Array();
+        }
+
+        if ( !chatroomObject[chatroomId].includes(socket.id) ) {
+            chatroomObject[chatroomId].push(socket.id);
+        }
+
+        sockeToChatroomObj[socket.id] = chatroomId;
+    })
+
+    socket.on('disconnect', () => {
+        const chatroomId = sockeToChatroomObj[socket.id];
+        const members = chatroomObject[chatroomId];
+        if ( members ) {
+            members.splice( members.indexOf(socket.id), 1 );
+        }
+        delete sockeToChatroomObj[socket.id];
+    })
+});

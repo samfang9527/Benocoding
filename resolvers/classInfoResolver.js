@@ -57,7 +57,7 @@ const resolvers = {
                         console.log('chatroomResult', chatroomResult);
 
                         // create general class info
-                        const classResult = await createClassInfo({...newData, chatroomId: chatroomResult._id});
+                        const classResult = await createClassInfo({...newData});
                         console.log('classResult', classResult);
 
                         // create user class info
@@ -66,7 +66,8 @@ const resolvers = {
                             userId: classResult.ownerId,
                             classId: classResult._id,
                             ownerId: classResult.ownerId,
-                            teacherOptions
+                            teacherOptions,
+                            chatroomId: chatroomResult._id
                         }
                         const userClassInfoResult = await createUserClassInfo(userClassInfoData);
                         console.log('userClassInfoResult', userClassInfoResult);

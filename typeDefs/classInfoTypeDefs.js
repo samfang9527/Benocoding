@@ -42,6 +42,7 @@ const typeDefs = `#graphql
         milestones: [Milestone]
         teacherOptions: [String]
         studentOptions: [String]
+        chatroomId: String
     }
 
     input MilestoneData {

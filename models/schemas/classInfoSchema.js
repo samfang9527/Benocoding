@@ -49,8 +49,7 @@ const classInfoSchema = mongoose.Schema({
     teacherOptions: [String],
     studentOptions: [String],
     studentNumbers: Number,
-    status: Boolean,
-    chatroomId: String
+    status: Boolean
 }, { collection: 'classInfos' } );
 
 export { classInfoSchema };
