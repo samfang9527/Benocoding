@@ -29,8 +29,8 @@ const resolvers = {
     Mutation: {
         createClass: async (_, args, context) => {
             const { data } = args;
-            const teacherOptions = ["class info", "class setting", "student list", "chatroom", "pull request"];
-            const studentOptions = ["class info", "student list", "chatroom", "pull request", "homework"];
+            const teacherOptions = ["class info", "student list", "chatroom", "pull request"];
+            const studentOptions = ["class info", "student list", "chatroom", "pull request", "milestones", "homework"];
             const studentNumbers = 0;
             const status = false;
 
