@@ -1,9 +1,16 @@
 
+import { User } from "./database.js";
 import { UserClassInfo } from "./database.js";
+import mongoose from "mongoose";
 
-async function getUserClassData(classId) {
+const { ObjectId } = mongoose.Types;
+
+async function getUserClassData(userClassId, userId) {
     try {
-        const data = await UserClassInfo.findById(classId);
+        const data = await UserClassInfo.find({
+            _id: new ObjectId(userClassId),
+            userId: userId
+        })
         return data;
     } catch (err) {
         console.error(err);
@@ -12,7 +19,14 @@ async function getUserClassData(classId) {
 
 async function createUserClassInfo(data) {
     try {
-        const result = await UserClassInfo.create(data);
+        const userData = await User.findById(data.userId);
+        const obj = {
+            userId: userData._id,
+            username: userData.username,
+            email: userData.email
+        }
+
+        const result = await UserClassInfo.create({...data, classMembers: obj});
         return result;
     } catch (err) {
         console.error(err);

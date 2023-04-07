@@ -21,16 +21,23 @@ import {
 const resolvers = {
     Query: {
         class: async (_, args, context) => {
-            const { classId } = args;
-            const info = await getUserClassData(classId);
+            const { userClassId, userId } = args;
+            const [ info ] = await getUserClassData(userClassId, userId);
             return info;
+        },
+        milestones: async (_, args, context) => {
+            const { userClassId, userId } = args;
+            console.log(userClassId, userId);
+            const [ info ] = await getUserClassData(userClassId, userId);
+            console.log(info);
+            return info.milestones;
         }
     },
     Mutation: {
         createClass: async (_, args, context) => {
             const { data } = args;
-            const teacherOptions = ["class info", "student list", "chatroom", "pull request"];
-            const studentOptions = ["class info", "student list", "chatroom", "pull request", "milestones", "homework"];
+            const teacherOptions = ["class info", "members", "chatroom", "pull request"];
+            const studentOptions = ["class info", "members", "chatroom", "pull request", "milestones", "homework"];
             const studentNumbers = 0;
             const status = false;
 

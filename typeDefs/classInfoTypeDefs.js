@@ -28,6 +28,12 @@ const typeDefs = `#graphql
         passed: Boolean
     }
 
+    type UserInfo {
+        userId: String
+        username: String
+        email: String
+    }
+
     type Class {
         ownerId: String
         id: String
@@ -43,6 +49,7 @@ const typeDefs = `#graphql
         teacherOptions: [String]
         studentOptions: [String]
         chatroomId: String
+        classMembers: [UserInfo]
     }
 
     input MilestoneData {
@@ -70,8 +77,8 @@ const typeDefs = `#graphql
     }
 
     type Query {
-        classes: [Class],
-        class(classId: String!): Class
+        class(userClassId: String!, userId: String!): Class
+        milestones(userClassId: String!, userId: String!): [Milestone]
     }
 
     type Mutation {
