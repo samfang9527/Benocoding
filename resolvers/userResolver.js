@@ -19,25 +19,44 @@ const resolvers = {
     },
     Mutation: {
         signin: async (_, args, context) => {
-            const { email, password } = args.data;
-            const data = await getUserDataByEmailAndPassword(email, password);
+            try {
+                const { email, password } = args.data;
+                const data = await getUserDataByEmailAndPassword(email, password);
 
-            if ( data ) {
-                const payload = {
-                    userId: data._id,
-                    username: data.username
+                if ( data ) {
+                    const payload = {
+                        userId: data._id,
+                        username: data.username
+                    }
+                    const token = jwt.sign(payload, process.env.JWT_PRIVATE_KEY, { expiresIn: "7d" });
+                    return {
+                        "jwt": token
+                    }
                 }
-                const token = jwt.sign(payload, process.env.JWT_PRIVATE_KEY, { expiresIn: "7d" });
-                return {
-                    "jwt": token
-                }
+                return;
+            } catch (err) {
+                console.error(err);
             }
-            return;
         },
         signup: async (root, args, context) => {
-            const { username, email, password } = args;
-            const result = await User.create( { username, email, password } );
-            return result;
+            try {
+                const { username, email, password } = args.data;
+                const result = await User.create( { username, email, password } );
+
+                if ( result ) {
+                    const payload = {
+                        userId: result._id,
+                        username: result.username
+                    }
+                    const token = jwt.sign(payload, process.env.JWT_PRIVATE_KEY, { expiresIn: "7d" });
+                    return {
+                        "jwt": token
+                    }
+                }
+                return;
+            } catch (err) {
+                console.error(err);
+            }
         }
     }
 };
