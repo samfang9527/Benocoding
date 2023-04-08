@@ -17,14 +17,24 @@ const typeDefs = `#graphql
         tags: [String]
     }
 
+    type Jwt {
+        jwt: String
+    }
+
+    input UserData {
+        username: String
+        email: String
+        password: String
+    }
+
     type Query {
         me(id: String!): User
         users: [User]
     }
 
     type Mutation {
-        addUser(username: String!, email: String!, password: String!): User
-        updateUsername(userId: ID!, newUsername: String!): User
+        signin(data: UserData!): Jwt
+        signup(data: UserData!): Jwt
     }
 `;
 

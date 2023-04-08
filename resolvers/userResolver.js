@@ -1,5 +1,8 @@
 
 import { User } from "../models/database.js";
+import {
+    getUserDataByEmailAndPassword
+} from "../models/userModel.js";
 
 const resolvers = {
     Query: {
@@ -11,16 +14,22 @@ const resolvers = {
             const infos = await User.find();
             return infos;
         }
+
     },
     Mutation: {
-        addUser: async (root, args, context) => {
+        signin: async (_, args, context) => {
+            const { email, password } = args.data;
+            const data = await getUserDataByEmailAndPassword(email, password);
+
+            if ( data ) {
+                
+            }
+
+            return data;
+        },
+        signup: async (root, args, context) => {
             const { username, email, password } = args;
             const result = await User.create( { username, email, password } );
-            return result;
-        },
-        updateUsername: async (root, args, context) => {
-            const { userId, newUsername } = args;
-            const result = await User.findByIdAndUpdate(userId, { username: newUsername })
             return result;
         }
     }
