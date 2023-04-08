@@ -1,12 +1,14 @@
 
-import { DB } from "../models/database.js";
+import { DB, UserClassInfo } from "../models/database.js";
 
 import {
+    getUserById,
     addUserClass
 } from "../models/userModel.js";
 
 import {
-    createClassInfo
+    createClassInfo,
+    getClass
 } from "../models/classModel.js";
 
 import {
@@ -21,15 +23,13 @@ import {
 const resolvers = {
     Query: {
         class: async (_, args, context) => {
-            const { userClassId, userId } = args;
-            const [ info ] = await getUserClassData(userClassId, userId);
+            const { classId } = args;
+            const info = await getClass(classId);
             return info;
         },
         milestones: async (_, args, context) => {
             const { userClassId, userId } = args;
-            console.log(userClassId, userId);
             const [ info ] = await getUserClassData(userClassId, userId);
-            console.log(info);
             return info.milestones;
         }
     },
@@ -40,6 +40,8 @@ const resolvers = {
             const studentOptions = ["class info", "members", "chatroom", "pull request", "milestones", "homework"];
             const studentNumbers = 0;
             const status = false;
+            const userData = await getUserById(data.ownerId);
+            console.log('userData', userData);
 
             const newData = {
                 ...data,
@@ -64,24 +66,26 @@ const resolvers = {
                         console.log('chatroomResult', chatroomResult);
 
                         // create general class info
-                        const classResult = await createClassInfo({...newData});
+                        const classResult = await createClassInfo({
+                            ...newData,
+                            chatroomId: chatroomResult._id,
+                            classMembers: []
+                        });
                         console.log('classResult', classResult);
 
                         // create user class info
                         const userClassInfoData = {
-                            ...data,
                             userId: classResult.ownerId,
                             classId: classResult._id,
-                            ownerId: classResult.ownerId,
-                            teacherOptions,
-                            chatroomId: chatroomResult._id
+                            milestones: newData.milestones
                         }
                         const userClassInfoResult = await createUserClassInfo(userClassInfoData);
                         console.log('userClassInfoResult', userClassInfoResult);
 
                         // update user info
                         const classData = {
-                            classId: userClassInfoResult._id,
+                            classId: classResult._id,
+                            userClassId: userClassInfoResult._id,
                             className: classResult.className,
                             role: "teacher",
                             githubAccessToken: process.env.GITHUB_ACCESS_TOKEN
@@ -93,12 +97,38 @@ const resolvers = {
 
                     } catch (err) {
                         console.error(err);
-                        return await session.abortTransaction();
+                        await session.abortTransaction();
                     }
                 })
                 return newData;
             } catch (err) {
                 console.error(err);
+            } finally {
+                await session.endSession();
+            }
+        },
+        buyClass: async (_, args, context) => {
+            const { data } = args;
+            const studentOptions = ["class info", "members", "chatroom", "pull request", "milestones", "homework"];
+
+            const newData = {
+                ...data,
+                studentOptions
+            }
+            console.log('newData', newData);
+
+            const session = await DB.startSession();
+            try {
+                await session.withTransaction(async () => {
+                    // create userClass data
+                    const userClassResult = await UserClassInfo.create()
+
+                    // Update user class
+                });
+                
+            } catch (err) {
+                console.error(err);
+                await session.abortTransaction();
             } finally {
                 await session.endSession();
             }

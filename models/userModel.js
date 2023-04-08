@@ -32,7 +32,17 @@ async function getUserDataByEmail(email) {
     }
 }
 
+async function getUserById(userId) {
+    try {
+        const data = await User.findById(userId);
+        return data;
+    } catch (err) {
+        console.error(err);
+    }
+}
+
 export {
     addUserClass,
-    getUserDataByEmail
+    getUserDataByEmail,
+    getUserById
 }

@@ -48,6 +48,8 @@ const typeDefs = `#graphql
         milestones: [Milestone]
         teacherOptions: [String]
         studentOptions: [String]
+        studentNumbers: Int
+        status: Boolean
         chatroomId: String
         classMembers: [UserInfo]
     }
@@ -77,12 +79,13 @@ const typeDefs = `#graphql
     }
 
     type Query {
-        class(userClassId: String!, userId: String!): Class
+        class(classId: String!): Class
         milestones(userClassId: String!, userId: String!): [Milestone]
     }
 
     type Mutation {
         createClass(data: InputData!): Class
+        buyClass(data: String): Class
     }
 `;
 

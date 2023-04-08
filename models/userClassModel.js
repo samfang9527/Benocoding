@@ -8,9 +8,10 @@ const { ObjectId } = mongoose.Types;
 async function getUserClassData(userClassId, userId) {
     try {
         const data = await UserClassInfo.find({
-            _id: new ObjectId(userClassId),
+            classId: userClassId,
             userId: userId
         })
+        console.log('data', data);
         return data;
     } catch (err) {
         console.error(err);
