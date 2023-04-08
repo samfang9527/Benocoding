@@ -20,11 +20,10 @@ async function addUserClass(userId, classData, classTags) {
     }
 }
 
-async function getUserDataByEmailAndPassword(email, password) {
+async function getUserDataByEmail(email) {
     try {
         const [ data ] = await User.find({
-            email: email,
-            password: password
+            email: email
         })
         return data;
 
@@ -35,5 +34,5 @@ async function getUserDataByEmailAndPassword(email, password) {
 
 export {
     addUserClass,
-    getUserDataByEmailAndPassword
+    getUserDataByEmail
 }

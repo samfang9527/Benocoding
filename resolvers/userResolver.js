@@ -1,8 +1,9 @@
 
+import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { User } from "../models/database.js";
 import {
-    getUserDataByEmailAndPassword
+    getUserDataByEmail
 } from "../models/userModel.js";
 
 function validateUsername(username) {
@@ -38,8 +39,14 @@ const resolvers = {
             try {
                 const { email, password } = args.data;
                 if ( validateEmail(email) && validatePassword(password) ) {
-                    const data = await getUserDataByEmailAndPassword(email, password);
+                    const data = await getUserDataByEmail(email);
                     if ( data ) {
+                        const hashedPassword = data.password;
+                        const passwordValid = await bcrypt.compare(password, hashedPassword);
+                        if ( !passwordValid ) {
+                            return;
+                        }
+
                         const payload = {
                             userId: data._id,
                             username: data.username
@@ -59,7 +66,10 @@ const resolvers = {
             try {
                 const { username, email, password } = args.data;
                 if ( validateUsername(username) && validateEmail(email) && validatePassword(password) ) {
-                    const result = await User.create( { username, email, password } );
+
+                    const hashedPassword = await bcrypt.hash(password, Number(process.env.BCRYPT_SALT_ROUNDS));
+                    console.log(hashedPassword);
+                    const result = await User.create( { username, email, password: hashedPassword } );
                     if ( result ) {
                         const payload = {
                             userId: result._id,
