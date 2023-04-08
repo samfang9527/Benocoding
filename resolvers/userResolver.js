@@ -1,4 +1,5 @@
 
+import jwt from "jsonwebtoken";
 import { User } from "../models/database.js";
 import {
     getUserDataByEmailAndPassword
@@ -22,10 +23,16 @@ const resolvers = {
             const data = await getUserDataByEmailAndPassword(email, password);
 
             if ( data ) {
-                
+                const payload = {
+                    userId: data._id,
+                    username: data.username
+                }
+                const token = jwt.sign(payload, process.env.JWT_PRIVATE_KEY, { expiresIn: "7d" });
+                return {
+                    "jwt": token
+                }
             }
-
-            return data;
+            return;
         },
         signup: async (root, args, context) => {
             const { username, email, password } = args;
