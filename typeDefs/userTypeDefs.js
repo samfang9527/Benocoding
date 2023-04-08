@@ -21,6 +21,11 @@ const typeDefs = `#graphql
         jwt: String
     }
 
+    type JwtData {
+        userId: String
+        username: String
+    }
+
     input UserData {
         username: String
         email: String
@@ -29,7 +34,7 @@ const typeDefs = `#graphql
 
     type Query {
         me(id: String!): User
-        users: [User]
+        jwtValidate: JwtData
     }
 
     type Mutation {

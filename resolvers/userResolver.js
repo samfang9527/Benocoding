@@ -28,11 +28,19 @@ const resolvers = {
             const info = await User.findById(id);
             return info;
         },
-        users: async () => {
-            const infos = await User.find();
-            return infos;
+        jwtValidate: async (_, args, context) => {
+            const { token } = context;
+            try {
+                const decoded = jwt.verify(token, process.env.JWT_PRIVATE_KEY);
+                return {
+                    userId: decoded.userId,
+                    username: decoded.username
+                }
+            } catch (err) {
+                console.error(err);
+                return;
+            }
         }
-
     },
     Mutation: {
         signin: async (_, args, context) => {
