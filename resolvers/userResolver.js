@@ -18,7 +18,7 @@ function validateEmail(email) {
 }
 
 function validatePassword(password) {
-    return 8 <= username.length <= 20;
+    return 8 <= password.length <= 20;
 }
 
 const resolvers = {
@@ -55,7 +55,7 @@ const resolvers = {
                 console.error(err);
             }
         },
-        signup: async (root, args, context) => {
+        signup: async (_, args, context) => {
             try {
                 const { username, email, password } = args.data;
                 if ( validateUsername(username) && validateEmail(email) && validatePassword(password) ) {
