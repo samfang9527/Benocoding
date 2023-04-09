@@ -1,6 +1,6 @@
 
 import jwt from "jsonwebtoken";
-import { DB, UserClassInfo, ClassInfo } from "../models/database.js";
+import { DB, UserClassInfo, ClassInfo, Chatroom } from "../models/database.js";
 
 import {
     addUserClass
@@ -32,6 +32,11 @@ const resolvers = {
             const { userClassId, userId } = args;
             const [ info ] = await getUserClassData(userClassId, userId);
             return info.milestones;
+        },
+        getMessages: async (_, args, context) => {
+            const { chatroomId } = args;
+            const data = await Chatroom.findById(chatroomId);
+            return data.messages;
         }
     },
     Mutation: {

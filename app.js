@@ -78,8 +78,8 @@ io.on('connection', (socket) => {
     console.log('a user connected');
 
     socket.on('newMessage', (message) => {
-        console.log(chatroomObject);
-        console.log(sockeToChatroomObj);
+        console.log('1', chatroomObject);
+        console.log('2', sockeToChatroomObj);
         const chatroomId = sockeToChatroomObj[socket.id];
         const chatroomMembers = chatroomObject[chatroomId];
         chatroomMembers.forEach((socketId) => {
@@ -100,6 +100,7 @@ io.on('connection', (socket) => {
     })
 
     socket.on('disconnect', () => {
+        console.log('disconnect!');
         const chatroomId = sockeToChatroomObj[socket.id];
         const members = chatroomObject[chatroomId];
         if ( members ) {

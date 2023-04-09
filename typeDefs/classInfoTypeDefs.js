@@ -54,6 +54,16 @@ const typeDefs = `#graphql
         classMembers: [UserInfo]
     }
 
+    type Message {
+        time: Date
+        from: String
+        message: String
+    }
+
+    type Messages {
+        messages: [Message]
+    }
+
     input MilestoneData {
         milestone: String
         milestoneDesc: String
@@ -81,6 +91,7 @@ const typeDefs = `#graphql
     type Query {
         class(classId: String!): Class
         milestones(userClassId: String!, userId: String!): [Milestone]
+        getMessages(chatroomId: String!): Messages
     }
 
     type Mutation {
