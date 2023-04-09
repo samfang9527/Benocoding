@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 const chatroomSchema = mongoose.Schema({
     messages: [{
         time: {
-            type: Date,
+            type: String,
             required: [true, 'time is required']
         },
         from: {

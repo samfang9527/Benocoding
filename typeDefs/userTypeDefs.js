@@ -24,6 +24,7 @@ const typeDefs = `#graphql
     type JwtData {
         userId: String
         username: String
+        email: String
     }
 
     input UserData {

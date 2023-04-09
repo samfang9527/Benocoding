@@ -34,7 +34,8 @@ const resolvers = {
                 const decoded = jwt.verify(token, process.env.JWT_PRIVATE_KEY);
                 return {
                     userId: decoded.userId,
-                    username: decoded.username
+                    username: decoded.username,
+                    email: decoded.email
                 }
             } catch (err) {
                 console.error(err);

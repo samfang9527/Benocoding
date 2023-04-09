@@ -6,7 +6,7 @@ import { ApolloServerPluginDrainHttpServer } from "@apollo/server/plugin/drainHt
 import http from "http";
 import cors from "cors";
 import { Server } from "socket.io";
-import { DB } from "./models/database.js";
+import { Chatroom } from "./models/database.js";
 import { generateUploadURL } from "./utils/s3.js";
 
 // typeDefs
@@ -77,14 +77,27 @@ const sockeToChatroomObj = {};
 io.on('connection', (socket) => {
     console.log('a user connected');
 
-    socket.on('newMessage', (message) => {
-        console.log('1', chatroomObject);
-        console.log('2', sockeToChatroomObj);
+    socket.on('newMessage', async (data) => {
+        console.log('chatroomObj', chatroomObject);
+        console.log('socketToChatroom', sockeToChatroomObj);
         const chatroomId = sockeToChatroomObj[socket.id];
-        const chatroomMembers = chatroomObject[chatroomId];
-        chatroomMembers.forEach((socketId) => {
-            io.to(socketId).emit('update', message.message);
-        })
+
+        // store messages to DB
+        try {
+            const msgData = {
+                time: new Date().toLocaleString(),
+                from: data.username,
+                message: data.message
+            }
+            await Chatroom.findByIdAndUpdate(chatroomId, {$push: {"messages": msgData}})
+
+            const chatroomMembers = chatroomObject[chatroomId];
+            chatroomMembers.forEach((socketId) => {
+                io.to(socketId).emit('update', msgData);
+            })
+        } catch (err) {
+            console.error(err);
+        }
     })
 
     socket.on('joinChatroom', (chatroomId) => {

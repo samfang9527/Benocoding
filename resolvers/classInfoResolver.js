@@ -36,6 +36,7 @@ const resolvers = {
         getMessages: async (_, args, context) => {
             const { chatroomId } = args;
             const data = await Chatroom.findById(chatroomId);
+            console.log(data.messages);
             return data.messages;
         }
     },
