@@ -80,7 +80,7 @@ const resolvers = {
                         const classResult = await createClassInfo({
                             ...newData,
                             chatroomId: chatroomResult._id,
-                            classMembers: []
+                            classMembers: [userData]
                         });
                         console.log('classResult', classResult);
 
@@ -132,10 +132,18 @@ const resolvers = {
             }
             console.log('userData', userData);
 
+            // check if already buy this class
+            const classInfo = await getClass(classId);
+            for ( let i = 0; i < classInfo.classMembers; i++) {
+                if ( classInfo.classMembers[i].userId === userData.userId ) {
+                    return false;
+                }
+            }
+
             const session = await DB.startSession();
             try {
 
-                const classInfo = await getClass(classId);
+                
 
                 await session.withTransaction(async () => {
                     // create userClass data
@@ -167,9 +175,8 @@ const resolvers = {
                     });
 
                     await session.commitTransaction();
-
-                    return true;
                 });
+                return true;
                 
             } catch (err) {
                 console.error(err);
