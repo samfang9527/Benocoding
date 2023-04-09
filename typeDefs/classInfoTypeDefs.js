@@ -85,7 +85,7 @@ const typeDefs = `#graphql
 
     type Mutation {
         createClass(data: InputData!): Class
-        buyClass(data: String): Class
+        buyClass(classId: String!): Boolean
     }
 `;
 

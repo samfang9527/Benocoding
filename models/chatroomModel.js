@@ -10,6 +10,18 @@ async function createChatroom(data) {
     }
 }
 
+async function addUserToChatroom(chatroomId, userInfo) {
+    try {
+        const result = Chatroom.findByIdAndUpdate(chatroomId, {
+            $push: {"members": userInfo}
+        }, {new: true})
+        return result;
+    } catch (err) {
+        console.error(err);
+    }
+}
+
 export {
-    createChatroom
+    createChatroom,
+    addUserToChatroom
 }

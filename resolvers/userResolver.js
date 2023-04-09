@@ -57,7 +57,8 @@ const resolvers = {
 
                         const payload = {
                             userId: data._id,
-                            username: data.username
+                            username: data.username,
+                            email: data.email
                         }
                         const token = jwt.sign(payload, process.env.JWT_PRIVATE_KEY, { expiresIn: "7d" });
                         return {
@@ -81,7 +82,8 @@ const resolvers = {
                     if ( result ) {
                         const payload = {
                             userId: result._id,
-                            username: result.username
+                            username: result.username,
+                            email: data.email
                         }
                         const token = jwt.sign(payload, process.env.JWT_PRIVATE_KEY, { expiresIn: "7d" });
                         return {
