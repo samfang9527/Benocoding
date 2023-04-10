@@ -8,6 +8,8 @@ import cors from "cors";
 import { Server } from "socket.io";
 import { Chatroom } from "./models/database.js";
 import { generateUploadURL } from "./utils/s3.js";
+import multer from "multer";
+import { exec } from "child_process";
 
 // typeDefs
 import { typeDefs as userTypeDefs } from "./typeDefs/userTypeDefs.js";
@@ -51,9 +53,31 @@ app.use(
 app.post('/fileUpload', async (req, res) => {
     const { fileExtension} = req.body;
     const url = await generateUploadURL(fileExtension);
-    console.log(url);
     return res.status(200).json(url);
 })
+
+// for auto-test
+const upload = multer({
+    limits: {
+        fileSize: 1024*1024,
+        files: 1
+    }
+})
+app.post(
+    '/autoTest',
+    upload.single('homework'),
+    async (req, res) => {
+        console.log(req.file);
+
+        const command = "ls";
+        const result = exec(command);
+
+        result.stdout.on("data", async (data) => {
+            console.log('回傳程式碼執行結果', `${data}`);
+        });
+        res.status(200).json('ok');
+    }
+)
 
 app.post('/test', (req, res) => {
     const { body } = req;
