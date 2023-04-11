@@ -1,6 +1,7 @@
 
 import jwt from "jsonwebtoken";
 import { DB, UserClassInfo, ClassInfo, Chatroom } from "../models/database.js";
+import { PAGELIMIT } from "../constant.js";
 
 import {
     addUserClass
@@ -38,6 +39,65 @@ const resolvers = {
             const data = await Chatroom.findById(chatroomId);
             console.log(data.messages);
             return data.messages;
+        },
+        getLearnerClassNums: async (_, args, context) => {
+            const { userId } = args;
+            const userClassNums = await UserClassInfo.find({
+                userId: userId
+            })
+            .countDocuments();
+
+            return Math.ceil(userClassNums / PAGELIMIT);
+
+        },
+        getLearnerClassList: async (_, args, context) => {
+            const { userId, pageNum } = args;
+
+            // calculate page range
+            const offset = pageNum * PAGELIMIT;
+
+            // see how many class the user have
+            const userClassData = await UserClassInfo.find({
+                userId: userId
+            })
+            .select('classId')
+            .skip(offset)
+            .limit(PAGELIMIT)
+            .exec();
+
+            // get all class datas and return
+            const responseData = await Promise.all(userClassData.map(async (ele) => {
+                const { classId } = ele;
+                const classData = await ClassInfo.findById(classId);
+                return classData;
+            }));
+            return responseData;
+        },
+        getCreaterClassNums: async (_, args, context, info) => {
+            const { userId } = args;
+
+            // get all class data
+            const classNums = await ClassInfo.find({
+                ownerId: userId,
+            })
+            .countDocuments();
+            return Math.ceil(classNums / PAGELIMIT);
+        },
+        getCreaterClassList: async (_, args, context, info) => {
+            const { userId, pageNum } = args;
+
+            // calculate page range
+            const offset = pageNum * PAGELIMIT;
+
+            // get all class data
+            const classData = await ClassInfo.find({
+                ownerId: userId,
+            })
+            .skip(offset)
+            .limit(PAGELIMIT)
+            .exec();
+            
+            return classData;
         }
     },
     Mutation: {

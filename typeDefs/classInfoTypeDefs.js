@@ -92,6 +92,10 @@ const typeDefs = `#graphql
         class(classId: String!): Class
         milestones(userClassId: String!, userId: String!): [Milestone]
         getMessages(chatroomId: String!): [Message]
+        getLearnerClassList(userId: String!, pageNum: Int!): [Class]
+        getCreaterClassList(userId: String!, pageNum: Int!): [Class]
+        getLearnerClassNums(userId: String!): Int
+        getCreaterClassNums(userId: String!): Int
     }
 
     type Mutation {
