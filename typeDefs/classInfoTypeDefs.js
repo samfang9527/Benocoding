@@ -25,6 +25,8 @@ const typeDefs = `#graphql
         case: String
         inputs: String
         result: String
+        method: String
+        statusCode: String
     }
 
     type Milestone {
