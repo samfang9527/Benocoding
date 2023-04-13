@@ -20,12 +20,20 @@ const DateType = new GraphQLScalarType({
 
 const typeDefs = `#graphql
     scalar Date
+    type TestCase {
+        case: String
+        inputs: String
+        result: String
+    }
+
     type Milestone {
         milestone: String
         milestoneDesc: String
-        video: String
-        autoTest: String
+        autoTest: Boolean
         passed: Boolean
+        functionTest: Boolean
+        functionName: String
+        testCases: [TestCase]
     }
 
     type UserInfo {

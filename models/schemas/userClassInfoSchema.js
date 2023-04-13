@@ -18,9 +18,15 @@ const userClassInfoSchema = mongoose.Schema({
             type: String,
             maxLength: [128, 'milestone description can\'t be greater than 128 characters']
         },
-        video: String,
-        autoTest: String,
-        passed: Boolean
+        autoTest: Boolean,
+        functionTest: Boolean,
+        passed: Boolean,
+        functionName: String,
+        testCases: [{
+            case: String,
+            inputs: String,
+            result: String,
+        }]
     }]
 }, { collection: 'userClassInfos' } );
 

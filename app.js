@@ -30,7 +30,7 @@ const httpServer = http.createServer(app);
 const server = new ApolloServer({
     typeDefs: [userTypeDefs, classInfoTypeDefs],
     resolvers: [userResolvers, classInfoResolvers],
-    plugins: [ApolloServerPluginDrainHttpServer( { httpServer } )]
+    plugins: [ApolloServerPluginDrainHttpServer( { httpServer } )],
 });
 
 await server.start();
