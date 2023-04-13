@@ -60,16 +60,21 @@ const resolvers = {
                 userId: userId
             })
             .select('classId')
-            .skip(offset)
-            .limit(PAGELIMIT)
             .exec();
 
             // get all class datas and return
             const responseData = await Promise.all(userClassData.map(async (ele) => {
                 const { classId } = ele;
-                const classData = await ClassInfo.findById(classId);
+                const [ classData ] = await ClassInfo.find({
+                    _id: classId,
+                    ownerId: { $ne: userId }
+                })
+                .skip(offset)
+                .limit(PAGELIMIT)
+                .exec();
                 return classData;
             }));
+            console.log(responseData);
             return responseData;
         },
         getCreaterClassNums: async (_, args, context, info) => {
@@ -103,7 +108,7 @@ const resolvers = {
         createClass: async (_, args, context) => {
             const { data } = args;
             const teacherOptions = ["class info", "members", "chatroom", "pull request"];
-            const studentOptions = ["class info", "members", "chatroom", "pull request", "milestones", "homework"];
+            const studentOptions = ["class info", "members", "chatroom", "pull request", "milestones"];
             const studentNumbers = 0;
             const status = false;
 
@@ -207,9 +212,6 @@ const resolvers = {
 
             const session = await DB.startSession();
             try {
-
-                
-
                 await session.withTransaction(async () => {
                     // create userClass data
                     const userClassResult = await UserClassInfo.create({

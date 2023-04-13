@@ -21,6 +21,7 @@ const DateType = new GraphQLScalarType({
 const typeDefs = `#graphql
     scalar Date
     type TestCase {
+        id: Int
         case: String
         inputs: String
         result: String
@@ -72,11 +73,21 @@ const typeDefs = `#graphql
         messages: [Message]
     }
 
+    input TestCaseData {
+        id: Int
+        case: String
+        inputs: String
+        result: String
+    }
+
     input MilestoneData {
         milestone: String
         milestoneDesc: String
-        autoTest: String
+        autoTest: Boolean
         passed: Boolean
+        functionTest: Boolean
+        functionName: String
+        testCases: [TestCaseData]
     }
 
     input InputData {

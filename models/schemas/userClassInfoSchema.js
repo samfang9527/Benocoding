@@ -15,8 +15,7 @@ const userClassInfoSchema = mongoose.Schema({
             minLength: [1, 'milestone can\'t be smaller than 1 characters']
         },
         milestoneDesc: {
-            type: String,
-            maxLength: [128, 'milestone description can\'t be greater than 128 characters']
+            type: String
         },
         autoTest: Boolean,
         functionTest: Boolean,

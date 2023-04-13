@@ -8,12 +8,10 @@ const classInfoSchema = mongoose.Schema({
     className: {
         type: String,
         required: [true, 'className is required'],
-        minLength: [1, 'classname can\'t be smaller than 1 characters'],
-        maxLength: [16, 'classname can\'t be greater than 16 characters']
+        minLength: [1, 'classname can\'t be smaller than 1 characters']
     },
     classDesc: {
-        type: String,
-        maxLength: [128, 'class description can\'t be greater than 128 characters']
+        type: String
     },
     teacherName: {
         type: String,
@@ -39,8 +37,7 @@ const classInfoSchema = mongoose.Schema({
             minLength: [1, 'milestone can\'t be smaller than 1 characters']
         },
         milestoneDesc: {
-            type: String,
-            maxLength: [128, 'milestone description can\'t be greater than 128 characters']
+            type: String
         },
         autoTest: Boolean,
         functionTest: Boolean,
