@@ -74,7 +74,6 @@ const resolvers = {
                 .exec();
                 return classData;
             }));
-            console.log(responseData);
             return responseData;
         },
         getCreaterClassNums: async (_, args, context, info) => {

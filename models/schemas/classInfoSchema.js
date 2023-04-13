@@ -47,6 +47,8 @@ const classInfoSchema = mongoose.Schema({
             case: String,
             inputs: String,
             result: String,
+            method: String,
+            statusCode: String,
         }]
     }],
     teacherOptions: [String],

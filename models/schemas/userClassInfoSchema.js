@@ -25,6 +25,8 @@ const userClassInfoSchema = mongoose.Schema({
             case: String,
             inputs: String,
             result: String,
+            method: String,
+            statusCode: String
         }]
     }]
 }, { collection: 'userClassInfos' } );
