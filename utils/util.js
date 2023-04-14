@@ -9,6 +9,13 @@ const wrapAsync = (fn) => {
     };
 };
 
+const getFileExtension = (filename) => {
+  if ( filename ) {
+    return filename.slice(filename.lastIndexOf('.'));
+  }
+}
+
 export {
-    wrapAsync
+    wrapAsync,
+    getFileExtension
 }

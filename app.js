@@ -19,6 +19,9 @@ import { typeDefs as classInfoTypeDefs } from "./typeDefs/classInfoTypeDefs.js";
 import { resolvers as userResolvers } from "./resolvers/userResolver.js";
 import { resolvers as classInfoResolvers } from "./resolvers/classInfoResolver.js";
 
+// express router
+import { autoTestRouter } from "./routes/autoTest_route.js";
+
 dotenv.config();
 
 // express
@@ -41,6 +44,7 @@ console.log(`🚀 Server ready at http://localhost:${port}/graphql`);
 app.use(cors());
 app.use(express.json());
 app.use(express.static('public'));
+app.use('/api/1.0', autoTestRouter);
 
 app.use(
     '/graphql',
@@ -55,29 +59,6 @@ app.post('/fileUpload', async (req, res) => {
     const url = await generateUploadURL(fileExtension);
     return res.status(200).json(url);
 })
-
-// for auto-test
-const upload = multer({
-    limits: {
-        fileSize: 1024*1024,
-        files: 1
-    }
-})
-app.post(
-    '/autoTest',
-    upload.single('homework'),
-    async (req, res) => {
-        console.log(req.file);
-
-        const command = "ls";
-        const result = exec(command);
-
-        result.stdout.on("data", async (data) => {
-            console.log('回傳程式碼執行結果', `${data}`);
-        });
-        res.status(200).json('ok');
-    }
-)
 
 app.post('/test', (req, res) => {
     const { body } = req;

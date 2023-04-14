@@ -2,11 +2,15 @@
 # modules
 node_modules/
 
+# test files
+autoTestFiles/
+
 # env
 .env
 
 # test
-*test*
+*_test*
+createTestData.js
 
 # mac
 .DS_Store
