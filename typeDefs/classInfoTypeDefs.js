@@ -82,7 +82,7 @@ const typeDefs = `#graphql
         messages: [Message]
     }
 
-    type GeneralPRdata {
+    type GeneralPRData {
         number: Int
         title: String
         body: String
@@ -90,8 +90,12 @@ const typeDefs = `#graphql
         updated_at: String
         head: String
         base: String
-        diff_url: String
         url: String
+    }
+
+    type DetailPRData {
+        mergeable: String
+        diffData: String
     }
 
     input TestCaseData {
@@ -138,7 +142,8 @@ const typeDefs = `#graphql
         getCreaterClassList(userId: String!, pageNum: Int!): [Class]
         getLearnerClassNums(userId: String!): Int
         getCreaterClassNums(userId: String!): Int
-        getAllPullRequests(userId: String!, classId: String!): [GeneralPRdata]
+        getAllPullRequests(userId: String!, classId: String!): [GeneralPRData]
+        getPRDetail(userId: String!, classId: String!, number: Int!) : DetailPRData
     }
 
     type Mutation {

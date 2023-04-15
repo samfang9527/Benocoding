@@ -22,6 +22,7 @@ import {
     createUserClassInfo,
     getUserClassData
 } from "../models/userClassModel.js";
+import e from "express";
 
 const resolvers = {
     Query: {
@@ -106,21 +107,57 @@ const resolvers = {
                         }
                     }
                 )
-                
+
                 const results = data.map((pr) => {
-                    return {
-                        number: pr.number,
-                        title: pr.title,
-                        body: pr.body,
-                        created_at: pr.created_at,
-                        updated_at: pr.updated_at,
-                        head: pr.head.label,
-                        base: pr.base.label,
-                        diff_url: pr.diff_url,
-                        url: pr.url
+                        return {
+                            number: pr.number,
+                            title: pr.title,
+                            body: pr.body,
+                            created_at: pr.created_at,
+                            updated_at: pr.updated_at,
+                            head: pr.head.label,
+                            base: pr.base.label,
+                            url: pr.url
+                        }
                     }
-                })
+                )
                 return results;
+            }
+        },
+        getPRDetail: async (_, args, context) => {
+            const { userId, classId, number } = args;
+            
+            const gitHubData = await ClassInfo.findById(classId);
+            const { ownerId, gitHub } = gitHubData;
+            if ( ownerId === userId ) {
+                try {
+                    const { data } = await axios.get(
+                        `https://api.github.com/repos/${gitHub.owner}/${gitHub.repo}/pulls/${number}`,
+                        {
+                            headers: {
+                                'Authorization': `token ${gitHub.accessToken}`,
+                                'Accept': 'application/vnd.github.v3+json'
+                            }
+                        }
+                    )
+    
+                    const diffData = await axios.get(
+                        `https://api.github.com/repos/${gitHub.owner}/${gitHub.repo}/pulls/${number}.diff`,
+                        {
+                            headers: {
+                                'Authorization': `token ${gitHub.accessToken}`,
+                                'Accept': 'application/vnd.github.v3.diff'
+                            }
+                        }
+                    )
+                    
+                    return {
+                        mergeable: data.mergeable,
+                        diffData: diffData.data
+                    }
+                } catch (err) {
+                    console.error(err);
+                }
             }
         }
     },
