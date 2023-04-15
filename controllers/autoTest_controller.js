@@ -1,6 +1,12 @@
 
 import { exec } from "child_process";
 import { v4 as uuidv4 } from 'uuid';
+import axios from "axios";
+
+function isUrl(string) {
+    const urlRegex = /^(?:http|https):\/\/[\w\-]+(?:\.[\w\-]+)+[\w\-.,@?^=%&:/~+#]*$/;
+    return urlRegex.test(string);
+}
 
 export const functionTest = async (req, res) => {
 
@@ -37,6 +43,8 @@ export const functionTest = async (req, res) => {
                     console.log('expected result', parsedResult);
     
                     const resultObj = {
+                        case: JSON.parse(testCase.case),
+                        inputs: JSON.parse(testCase.inputs),
                         passed: false,
                         execResult: stdout,
                         expectedResult: parsedResult
@@ -58,8 +66,51 @@ export const functionTest = async (req, res) => {
 }
 
 export const apiTest = async (req, res) => {
-    const data = req.body;
-    console.log(data);
-    res.status(200).json('ok');
+    const { targetUrl, testCases } = req.body;
+    const parsedTestCases = JSON.parse(testCases);
+
+    console.log(targetUrl, parsedTestCases);
+
+    if ( !isUrl(targetUrl) ) {
+        console.log('aaa');
+        return res.status(400).json({ message: "Not valid url" });
+    }
+
+    const testResults = await Promise.all(parsedTestCases.map((testCase) => {
+        return new Promise( async (resolve, reject) => {
+            try {
+                const response = await axios({
+                    method: `${JSON.parse(testCase.method)}`,
+                    url: targetUrl,
+                    headers: {
+                        "Content-Type": "application/json"
+                    }
+                })
+                
+                const { status, data } = response;
+                const resultObj = {
+                    case: JSON.parse(testCase.case),
+                    url: targetUrl,
+                    passed: true,
+                    execStatus: status,
+                    expectedStatus: JSON.parse(testCase.statusCode),
+                    execData: data,
+                    expectedData: JSON.parse(testCase.result)
+                }
+                if ( String(status) !== JSON.parse(testCase.statusCode) || data !== JSON.parse(testCase.result) ) {
+                    resultObj.passed = false;
+                }
+                resolve(resultObj);   
+                
+            } catch (err) {
+                reject({
+                    passed: false,
+                    message: err
+                })
+            }
+        })
+    }));
+    console.log(testResults);
+    res.status(200).json(testResults);
 }
 
