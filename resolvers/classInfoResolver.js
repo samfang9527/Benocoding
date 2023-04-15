@@ -2,6 +2,7 @@
 import jwt from "jsonwebtoken";
 import { DB, UserClassInfo, ClassInfo, Chatroom } from "../models/database.js";
 import { PAGELIMIT } from "../constant.js";
+import axios from "axios";
 
 import {
     addUserClass
@@ -61,10 +62,10 @@ const resolvers = {
             .skip(offset)
             .limit(PAGELIMIT)
             .exec();
-            
+
             return responseData;
         },
-        getCreaterClassNums: async (_, args, context, info) => {
+        getCreaterClassNums: async (_, args, context) => {
             const { userId } = args;
 
             // get all class data
@@ -74,7 +75,7 @@ const resolvers = {
             .countDocuments();
             return Math.ceil(classNums / PAGELIMIT);
         },
-        getCreaterClassList: async (_, args, context, info) => {
+        getCreaterClassList: async (_, args, context) => {
             const { userId, pageNum } = args;
 
             // calculate page range
@@ -89,6 +90,38 @@ const resolvers = {
             .exec();
             
             return classData;
+        },
+        getAllPullRequests: async (_, args, context) => {
+            const { userId, classId } = args;
+            
+            const gitHubData = await ClassInfo.findById(classId);
+            const { ownerId, gitHub } = gitHubData;
+            if ( ownerId === userId ) {
+                const { data } = await axios.get(
+                    `https://api.github.com/repos/${gitHub.owner}/${gitHub.repo}/pulls`,
+                    {
+                        headers: {
+                            'Authorization': `token ${gitHub.accessToken}`,
+                            'Accept': 'application/vnd.github.v3+json'
+                        }
+                    }
+                )
+                
+                const results = data.map((pr) => {
+                    return {
+                        number: pr.number,
+                        title: pr.title,
+                        body: pr.body,
+                        created_at: pr.created_at,
+                        updated_at: pr.updated_at,
+                        head: pr.head.label,
+                        base: pr.base.label,
+                        diff_url: pr.diff_url,
+                        url: pr.url
+                    }
+                })
+                return results;
+            }
         }
     },
     Mutation: {

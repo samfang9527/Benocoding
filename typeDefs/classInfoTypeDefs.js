@@ -82,6 +82,18 @@ const typeDefs = `#graphql
         messages: [Message]
     }
 
+    type GeneralPRdata {
+        number: Int
+        title: String
+        body: String
+        created_at: String
+        updated_at: String
+        head: String
+        base: String
+        diff_url: String
+        url: String
+    }
+
     input TestCaseData {
         id: Int
         case: String
@@ -126,6 +138,7 @@ const typeDefs = `#graphql
         getCreaterClassList(userId: String!, pageNum: Int!): [Class]
         getLearnerClassNums(userId: String!): Int
         getCreaterClassNums(userId: String!): Int
+        getAllPullRequests(userId: String!, classId: String!): [GeneralPRdata]
     }
 
     type Mutation {
