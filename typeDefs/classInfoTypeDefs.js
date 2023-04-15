@@ -45,6 +45,12 @@ const typeDefs = `#graphql
         email: String
     }
 
+    type Github {
+        repo: String
+        owner: String
+        accessToken: String
+    }
+
     type Class {
         ownerId: String
         id: String
@@ -63,6 +69,7 @@ const typeDefs = `#graphql
         status: Boolean
         chatroomId: String
         classMembers: [UserInfo]
+        gitHub: Github
     }
 
     type Message {

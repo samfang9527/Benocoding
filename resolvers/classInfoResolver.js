@@ -54,26 +54,14 @@ const resolvers = {
 
             // calculate page range
             const offset = pageNum * PAGELIMIT;
-
-            // see how many class the user have
-            const userClassData = await UserClassInfo.find({
-                userId: userId
+            const responseData = await ClassInfo.find({
+                ownerId: { $ne: userId }, // userId 不等於 ownerId
+                classMembers: { $elemMatch: { userId: userId } } // classMembers 陣列內包含 userId 的物件
             })
-            .select('classId')
+            .skip(offset)
+            .limit(PAGELIMIT)
             .exec();
-
-            // get all class datas and return
-            const responseData = await Promise.all(userClassData.map(async (ele) => {
-                const { classId } = ele;
-                const [ classData ] = await ClassInfo.find({
-                    _id: classId,
-                    ownerId: { $ne: userId }
-                })
-                .skip(offset)
-                .limit(PAGELIMIT)
-                .exec();
-                return classData;
-            }));
+            
             return responseData;
         },
         getCreaterClassNums: async (_, args, context, info) => {
@@ -107,7 +95,7 @@ const resolvers = {
         createClass: async (_, args, context) => {
             const { data } = args;
             const teacherOptions = ["class info", "members", "chatroom", "pull request"];
-            const studentOptions = ["class info", "members", "chatroom", "pull request", "milestones"];
+            const studentOptions = ["class info", "members", "chatroom", "milestones"];
             const studentNumbers = 0;
             const status = false;
 

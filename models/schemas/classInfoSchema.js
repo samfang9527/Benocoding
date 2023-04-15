@@ -60,7 +60,12 @@ const classInfoSchema = mongoose.Schema({
         userId: String,
         username: String,
         email: String,
-    }]
+    }],
+    gitHub: {
+        repo: String,
+        owner: String,
+        accessToken: String
+    }
 }, { collection: 'classInfos' } );
 
 export { classInfoSchema };
