@@ -8,8 +8,8 @@ import cors from "cors";
 import { Server } from "socket.io";
 import { Chatroom } from "./models/database.js";
 import { generateUploadURL } from "./utils/s3.js";
-import multer from "multer";
-import { exec } from "child_process";
+import { Configuration, OpenAIApi } from "openai";
+import axios from "axios";
 
 // typeDefs
 import { typeDefs as userTypeDefs } from "./typeDefs/userTypeDefs.js";
@@ -58,12 +58,6 @@ app.post('/fileUpload', async (req, res) => {
     const { fileExtension} = req.body;
     const url = await generateUploadURL(fileExtension);
     return res.status(200).json(url);
-})
-
-app.post('/test', (req, res) => {
-    const { body } = req;
-    console.log(body);
-    res.status(200).send('ok');
 })
 
 app.use((req, res) => {
@@ -115,6 +109,53 @@ io.on('connection', (socket) => {
         }
 
         sockeToChatroomObj[socket.id] = chatroomId;
+    })
+
+    socket.on('codeReview', async (diffString) => {
+        // connect to openai
+        const apiKey = process.env.CHATGPT_API_KEY;
+        const organization = process.env.CHATGPT_ORGANIZATION;
+        const intro = `
+            Please review all the following code diff and give me a summary,
+            describe the change and tell me if there are any problems or recommendations that can make it better.
+        `;
+        const model = process.env.CHATGPT_MODEL;
+        const messages = [{
+            "role": "system",
+            "content": intro
+        }]
+
+        try {
+            const segmentLength = 2048;
+            for (let i = 0; i < diffString.length; i += segmentLength) {
+                const part = diffString.slice(i, i + segmentLength);
+                messages.push({
+                    "role": "user",
+                    "content": part
+                });
+            }
+
+            const configuration = new Configuration({
+                apiKey: apiKey,
+                organization: organization
+            });
+            
+            const openai = new OpenAIApi(configuration);
+            
+            console.log('start generating code review');
+            const response = await openai.createChatCompletion({
+                model: model,
+                messages: messages
+            })
+            const codeReview = response.data.choices[0].message.content;
+            socket.emit('codeReviewResult', codeReview);
+            console.log(codeReview);
+            console.log('Complete generating code review');
+
+
+        } catch (err) {
+            console.error(err.response);
+        }
     })
 
     socket.on('disconnect', () => {

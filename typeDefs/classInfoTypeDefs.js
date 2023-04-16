@@ -94,6 +94,7 @@ const typeDefs = `#graphql
     }
 
     type DetailPRData {
+        body: String
         html_url: String
         state: String
         merge_commit_sha: String

@@ -142,7 +142,7 @@ const resolvers = {
                     )
     
                     const diffData = await axios.get(
-                        `https://api.github.com/repos/${gitHub.owner}/${gitHub.repo}/pulls/${number}.diff`,
+                        `https://api.github.com/repos/${gitHub.owner}/${gitHub.repo}/pulls/${number}.diff?diff_filter=exclude:package-lock.json`,
                         {
                             headers: {
                                 'Authorization': `token ${gitHub.accessToken}`,
@@ -150,7 +150,27 @@ const resolvers = {
                             }
                         }
                     )
+                    
+                    const diffLines = diffData.data.split('\n');
+                    // exclude changes on package-lock.json
+                    const newDiffLines = [];
+                    let jump = false;
+                    for ( let i = 0; i < diffLines.length; i++ ) {
+                        const line = diffLines[i];
+                        if ( line.includes('diff') ) {
+                            if ( line.includes('package-lock.json') ) {
+                                jump = true;
+                            } else {
+                                jump = false;
+                            }  
+                        }
+                        if ( !jump ) {
+                            newDiffLines.push(line);
+                        }
+                    }
+                    
                     return {
+                        body: data.body,
                         html_url: data.html_url,
                         state: data.state,
                         merge_commit_sha: data.merge_commit_sha,
@@ -158,7 +178,7 @@ const resolvers = {
                         additions: data.additions,
                         deletions: data.deletions,
                         mergeable: data.mergeable,
-                        diffData: diffData.data
+                        diffData: newDiffLines.join('\n')
                     }
                 } catch (err) {
                     console.error(err);
