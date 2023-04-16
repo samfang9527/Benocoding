@@ -2,6 +2,7 @@
 import { exec } from "child_process";
 import { v4 as uuidv4 } from 'uuid';
 import axios from "axios";
+import { UserClassInfo } from "../models/database.js";
 
 function isUrl(string) {
     const urlRegex = /^(?:http|https):\/\/[\w\-]+(?:\.[\w\-]+)+[\w\-.,@?^=%&:/~+#]*$/;
@@ -10,7 +11,7 @@ function isUrl(string) {
 
 export const functionTest = async (req, res) => {
 
-    const { functionName } = req.body;
+    const { functionName, classId, userId, milestoneIdx } = req.body;
     const testCases = JSON.parse(req.body.testCases);
 
     const file = req.file;
@@ -19,7 +20,6 @@ export const functionTest = async (req, res) => {
     }
 
     const { path: filePath, filename } = file;
-    console.log(testCases);
 
     // run all test cases
     const testResults = await Promise.all(testCases.map((testCase) => {
@@ -50,9 +50,7 @@ export const functionTest = async (req, res) => {
                         expectedResult: parsedResult
                     }
     
-                    if ( stdout.trim() !== parsedResult ) {
-                        allPassed = false;
-                    } else {
+                    if ( stdout.trim() === parsedResult ) {
                         resultObj.passed = true;
                     }
                     exec(`docker rm ${containerName}`);
@@ -62,6 +60,20 @@ export const functionTest = async (req, res) => {
         })
     }));
     console.log(testResults);
+    for ( let i = 0; i < testResults.length; i++ ) {
+        if ( !testResults[i].passed ) {
+            return res.status(200).json({testResults});
+        }
+    }
+    // update milestone passed to true
+    const result = await UserClassInfo.updateOne(
+        { classId: classId, userId: userId },
+        { $set: { [`milestones.${milestoneIdx}.passed`]: true } },
+        { new: true }
+    );
+    console.log('classId', classId);
+    console.log('userId', userId);
+    console.log(result);
     res.status(200).json({testResults});
 }
 
