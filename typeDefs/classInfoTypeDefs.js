@@ -143,7 +143,7 @@ const typeDefs = `#graphql
 
     type Query {
         class(classId: String!): Class
-        milestones(userClassId: String!, userId: String!): [Milestone]
+        milestones(classId: String!, userId: String!): [Milestone]
         getMessages(chatroomId: String!): [Message]
         getLearnerClassList(userId: String!, pageNum: Int!): [Class]
         getCreaterClassList(userId: String!, pageNum: Int!): [Class]

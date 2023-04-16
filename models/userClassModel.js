@@ -5,10 +5,10 @@ import mongoose from "mongoose";
 
 const { ObjectId } = mongoose.Types;
 
-async function getUserClassData(userClassId, userId) {
+async function getUserClassData(classId, userId) {
     try {
         const data = await UserClassInfo.find({
-            classId: userClassId,
+            classId: classId,
             userId: userId
         })
         console.log('data', data);

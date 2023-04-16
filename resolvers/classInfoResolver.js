@@ -32,8 +32,8 @@ const resolvers = {
             return info;
         },
         milestones: async (_, args, context) => {
-            const { userClassId, userId } = args;
-            const [ info ] = await getUserClassData(userClassId, userId);
+            const { classId, userId } = args;
+            const [ info ] = await getUserClassData(classId, userId);
             return info.milestones;
         },
         getMessages: async (_, args, context) => {
@@ -123,6 +123,7 @@ const resolvers = {
                 )
                 return results;
             }
+            return [];
         },
         getPRDetail: async (_, args, context) => {
             const { userId, classId, number } = args;

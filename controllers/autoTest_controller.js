@@ -71,9 +71,6 @@ export const functionTest = async (req, res) => {
         { $set: { [`milestones.${milestoneIdx}.passed`]: true } },
         { new: true }
     );
-    console.log('classId', classId);
-    console.log('userId', userId);
-    console.log(result);
     res.status(200).json({testResults});
 }
 
