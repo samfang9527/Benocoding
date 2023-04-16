@@ -150,8 +150,13 @@ const resolvers = {
                             }
                         }
                     )
-                    
                     return {
+                        html_url: data.html_url,
+                        state: data.state,
+                        merge_commit_sha: data.merge_commit_sha,
+                        commits: data.commits,
+                        additions: data.additions,
+                        deletions: data.deletions,
                         mergeable: data.mergeable,
                         diffData: diffData.data
                     }
