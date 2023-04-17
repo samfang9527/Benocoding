@@ -59,9 +59,11 @@ const resolvers = {
             .skip(offset)
             .limit(PAGELIMIT)
             .exec();
-            
-            console.log('classData', classData);
             return classData;
+        },
+        getRandomClasses: async (_, args, context) => {
+            const data = await ClassInfo.aggregate([{$sample: {size: 3}}]);
+            return data;
         },
         getAllPageNums: async (_, args, context) => {
             // get all class data
