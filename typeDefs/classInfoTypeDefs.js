@@ -145,6 +145,8 @@ const typeDefs = `#graphql
         class(classId: String!): Class
         milestones(classId: String!, userId: String!): [Milestone]
         getMessages(chatroomId: String!): [Message]
+        getAllClassList(pageNum: Int!): [Class]
+        getAllPageNums: Int 
         getLearnerClassList(userId: String!, pageNum: Int!): [Class]
         getCreaterClassList(userId: String!, pageNum: Int!): [Class]
         getLearnerClassNums(userId: String!): Int

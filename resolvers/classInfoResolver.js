@@ -1,7 +1,7 @@
 
 import jwt from "jsonwebtoken";
 import { DB, UserClassInfo, ClassInfo, Chatroom } from "../models/database.js";
-import { PAGELIMIT } from "../constant.js";
+import { PAGELIMIT, HOME_PAGELIMIT } from "../constant.js";
 import axios from "axios";
 
 import {
@@ -40,6 +40,26 @@ const resolvers = {
             const { chatroomId } = args;
             const data = await Chatroom.findById(chatroomId);
             return data.messages;
+        },
+        getAllClassList: async (_, args, context) => {
+            const { pageNum } = args;
+
+            // calculate page range
+            const offset = pageNum * HOME_PAGELIMIT;
+
+            // get all class data
+            const classData = await ClassInfo.find()
+            .skip(offset)
+            .limit(PAGELIMIT)
+            .exec();
+            
+            return classData;
+        },
+        getAllPageNums: async (_, args, context) => {
+            // get all class data
+            const allPagnNums = await ClassInfo.find().countDocuments();
+
+            return Math.ceil(allPagnNums / HOME_PAGELIMIT);
         },
         getLearnerClassNums: async (_, args, context) => {
             const { userId } = args;
