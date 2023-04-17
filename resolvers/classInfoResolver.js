@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 import { DB, UserClassInfo, ClassInfo, Chatroom } from "../models/database.js";
 import { PAGELIMIT, HOME_PAGELIMIT } from "../constant.js";
 import axios from "axios";
+import escapeStringRegexp from "escape-string-regexp";
 
 import {
     addUserClass
@@ -41,18 +42,25 @@ const resolvers = {
             const data = await Chatroom.findById(chatroomId);
             return data.messages;
         },
-        getAllClassList: async (_, args, context) => {
-            const { pageNum } = args;
+        getClassList: async (_, args, context) => {
+            const { pageNum, keyword } = args;
 
+            const filter = {}
+            if ( keyword ) {
+                const regex = new RegExp(`.*${escapeStringRegexp(keyword)}.*`, "i");
+                filter.className = regex;
+            }
+            
             // calculate page range
             const offset = pageNum * HOME_PAGELIMIT;
 
             // get all class data
-            const classData = await ClassInfo.find()
+            const classData = await ClassInfo.find(filter)
             .skip(offset)
             .limit(PAGELIMIT)
             .exec();
             
+            console.log('classData', classData);
             return classData;
         },
         getAllPageNums: async (_, args, context) => {
