@@ -63,7 +63,13 @@ const resolvers = {
         },
         getRandomClasses: async (_, args, context) => {
             const data = await ClassInfo.aggregate([{$sample: {size: 3}}]);
-            return data;
+            const newData = data.map((ele) => {
+                return {
+                    ...ele,
+                    id: ele._id
+                }
+            })
+            return newData;
         },
         getAllPageNums: async (_, args, context) => {
             // get all class data

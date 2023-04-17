@@ -81,7 +81,7 @@ export const apiTest = async (req, res) => {
     console.log(targetUrl, parsedTestCases);
 
     if ( !isUrl(targetUrl) ) {
-        console.log('aaa');
+        console.log('invalid');
         return res.status(400).json({ message: "Not valid url" });
     }
 
