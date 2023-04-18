@@ -46,10 +46,6 @@ app.use(express.json());
 app.use(express.static('public'));
 app.use('/api/1.0', autoTestRouter);
 
-app.use('/', (req, res) => {
-    res.status(200).json({message: 'ok'})
-})
-
 app.use(
     '/graphql',
     expressMiddleware(server, {
