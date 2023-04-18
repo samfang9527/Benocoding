@@ -9,7 +9,7 @@ import { Server } from "socket.io";
 import { Chatroom } from "./models/database.js";
 import { generateUploadURL } from "./utils/s3.js";
 import { Configuration, OpenAIApi } from "openai";
-import axios from "axios";
+import { API_DOMAIN, DOMAIN } from "./constant.js";
 
 // typeDefs
 import { typeDefs as userTypeDefs } from "./typeDefs/userTypeDefs.js";
@@ -39,12 +39,16 @@ const server = new ApolloServer({
 await server.start();
 
 await new Promise((resolve) => httpServer.listen({ port: port }, resolve));
-console.log(`🚀 Server ready at http://localhost:${port}/graphql`);
+console.log(`🚀 Server ready at ${API_DOMAIN}/graphql`);
 
 app.use(cors());
 app.use(express.json());
 app.use(express.static('public'));
 app.use('/api/1.0', autoTestRouter);
+
+app.use('/', (req, res) => {
+    res.status(200).json({message: 'ok'})
+})
 
 app.use(
     '/graphql',
@@ -67,7 +71,7 @@ app.use((req, res) => {
 
 // socket.io
 const io = new Server(httpServer, {
-    cors: 'http://localhost:8080'
+    cors: DOMAIN
 });
 
 const chatroomObject = {};
