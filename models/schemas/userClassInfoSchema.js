@@ -9,6 +9,7 @@ const userClassInfoSchema = mongoose.Schema({
         type: String,
         required: [true, 'classId is required']
     },
+    paymentStatus: Boolean,
     milestones: [{
         milestone: {
             type: String,

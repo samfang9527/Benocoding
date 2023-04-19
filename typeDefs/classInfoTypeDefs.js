@@ -52,6 +52,8 @@ const typeDefs = `#graphql
     }
 
     type Class {
+        status: Int
+        responseMessage: String
         ownerId: String
         id: String
         className: String
@@ -70,6 +72,7 @@ const typeDefs = `#graphql
         chatroomId: String
         classMembers: [UserInfo]
         gitHub: Github
+        price: Int
     }
 
     type Message {
@@ -158,7 +161,7 @@ const typeDefs = `#graphql
 
     type Mutation {
         createClass(data: InputData!): Class
-        buyClass(classId: String!): Boolean
+        buyClass(classId: String!): Class
     }
 `;
 

@@ -226,7 +226,7 @@ const resolvers = {
     Mutation: {
         createClass: async (_, args, context) => {
             const { data } = args;
-            const teacherOptions = ["class info", "members", "chatroom", "pull request"];
+            const teacherOptions = ["class info", "members", "chatroom", "pull request", "settings"];
             const studentOptions = ["class info", "members", "chatroom", "milestones"];
             const studentNumbers = 0;
             const status = false;
@@ -240,7 +240,6 @@ const resolvers = {
                 console.error(err);
                 return;
             }
-            console.log('userData', userData);
 
             // bind other infos to data
             const newData = {
@@ -250,7 +249,6 @@ const resolvers = {
                 studentNumbers,
                 status
             }
-            console.log('newData', newData);
 
             const session = await DB.startSession();
             try {
@@ -263,7 +261,6 @@ const resolvers = {
                             ownerId: newData.ownerId,
                             members: [userData]
                         })
-                        console.log('chatroomResult', chatroomResult);
 
                         // create general class info
                         const classResult = await createClassInfo({
@@ -271,7 +268,6 @@ const resolvers = {
                             chatroomId: chatroomResult._id,
                             classMembers: [userData]
                         });
-                        console.log('classResult', classResult);
 
                         // create user class info
                         const userClassInfoData = {
@@ -280,7 +276,6 @@ const resolvers = {
                             milestones: newData.milestones
                         }
                         const userClassInfoResult = await createUserClassInfo(userClassInfoData);
-                        console.log('userClassInfoResult', userClassInfoResult);
 
                         // update user info
                         const classData = {
@@ -290,8 +285,7 @@ const resolvers = {
                             role: "teacher",
                             githubAccessToken: process.env.GITHUB_ACCESS_TOKEN
                         }
-                        const userResult = await addUserClass(newData.ownerId, classData, newData.classTags);
-                        console.log('userResult', userResult);
+                        await addUserClass(newData.ownerId, classData, newData.classTags);
 
                         await session.commitTransaction();
 
@@ -317,7 +311,10 @@ const resolvers = {
                 userData = jwt.verify(token, process.env.JWT_PRIVATE_KEY);
             } catch (err) {
                 console.error(err);
-                return;
+                return {
+                    status: 401,
+                    responseMessage: "Authentication failed"
+                };
             }
             console.log('userData', userData);
 
@@ -325,51 +322,52 @@ const resolvers = {
             const classInfo = await getClass(classId);
             for ( let i = 0; i < classInfo.classMembers; i++) {
                 if ( classInfo.classMembers[i].userId === userData.userId ) {
-                    return false;
+                    return {
+                        status: 409,
+                        responseMessage: "Already bought the class"
+                    };
                 }
             }
 
-            const session = await DB.startSession();
             try {
-                await session.withTransaction(async () => {
-                    // create userClass data
-                    const userClassResult = await UserClassInfo.create({
-                        userId: userData.userId,
-                        classId: classInfo._id,
-                        milestones: classInfo.milestones
-                    })
-                    console.log('userClassResult', userClassResult);
+                // create userClass data
+                const userClassResult = await UserClassInfo.create({
+                    userId: userData.userId,
+                    classId: classInfo._id,
+                    milestones: classInfo.milestones
+                })
+                console.log('userClassResult', userClassResult);
 
-                    // Update user class
-                    const classData = {
-                        classId: classInfo._id,
-                        className: classInfo.className,
-                        role: 'student',
-                        githubAccessToken: process.env.GITHUB_ACCESS_TOKEN
-                    }
-                    const userUpdatedResult = await addUserClass(userData.userId, classData, classInfo.classTags);
-                    console.log('userUpdatedResult', userUpdatedResult);
+                // Update user class
+                const classData = {
+                    classId: classInfo._id,
+                    className: classInfo.className,
+                    role: 'student',
+                    githubAccessToken: process.env.GITHUB_ACCESS_TOKEN
+                }
+                const userUpdatedResult = await addUserClass(userData.userId, classData, classInfo.classTags);
+                console.log('userUpdatedResult', userUpdatedResult);
 
-                    // update chatroom
-                    const chatroomResult = await addUserToChatroom(classInfo.chatroomId, userData);
-                    console.log('chatroomResult', chatroomResult);
+                // update chatroom
+                const chatroomResult = await addUserToChatroom(classInfo.chatroomId, userData);
+                console.log('chatroomResult', chatroomResult);
 
-                    // update class student number
-                    await ClassInfo.findByIdAndUpdate(classId, {
-                        $inc: {"studentNumbers": 1},
-                        $push: {"classMembers": userData}
-                    });
-
-                    await session.commitTransaction();
+                // update class student number
+                await ClassInfo.findByIdAndUpdate(classId, {
+                    $inc: {"studentNumbers": 1},
+                    $push: {"classMembers": userData}
                 });
-                return true;
+                return {
+                    status: 200,
+                    responseMessage: "Successful"
+                };
                 
             } catch (err) {
                 console.error(err);
-                await session.abortTransaction();
-                return false;
-            } finally {
-                await session.endSession();
+                return {
+                    status: 501,
+                    responseMessage: "Error creating data"
+                };
             }
         }
     }

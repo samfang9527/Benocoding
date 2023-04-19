@@ -65,7 +65,8 @@ const classInfoSchema = mongoose.Schema({
         repo: String,
         owner: String,
         accessToken: String
-    }
+    },
+    price: Number
 }, { collection: 'classInfos' } );
 
 export { classInfoSchema };

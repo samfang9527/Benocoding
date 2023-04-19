@@ -18,11 +18,17 @@ const userSchema = mongoose.Schema({
         type: String,
         require: [true, 'password is required'],
     },
-    class: [{
+    createdClasses: [{
         classId: String,
+        classImage: String,
         className: String,
-        role: String,
-        githubAccessToken: String
+        classDesc: String,
+    }],
+    boughtClasses: [{
+        classId: String,
+        classImage: String,
+        className: String,
+        classDesc: String,
     }],
     tags: [String]
 }, { collection: 'users' } );
