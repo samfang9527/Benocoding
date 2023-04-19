@@ -1,5 +1,5 @@
 
-import { DB, UserClassInfo, ClassInfo, Chatroom } from "../models/database.js";
+import { DB, UserClassInfo, ClassInfo, Chatroom, User } from "../models/database.js";
 import { PAGELIMIT, HOME_PAGELIMIT } from "../constant.js";
 import axios from "axios";
 import escapeStringRegexp from "escape-string-regexp";
@@ -41,10 +41,8 @@ const resolvers = {
 
             try {
                 const info = await getClass(classId);
-                return {
-                    ...info,
-                    response: generateResponseObj(200, "ok")
-                };
+                info.response = generateResponseObj(200, "ok");
+                return info;
             } catch (err) {
                 return { response: generateResponseObj(500, "Internal Server Error") }
             }
@@ -200,13 +198,10 @@ const resolvers = {
 
             try {
                 // get all class data
-                const classNums = await ClassInfo.find({
-                    ownerId: userId,
-                })
-                .countDocuments();
+                const userData = await User.findById(userId);
                 return {
                     response: generateResponseObj(200, "ok"),
-                    number: Math.ceil(classNums / PAGELIMIT)
+                    number: Math.ceil( userData.createdClasses.length / PAGELIMIT )
                 }
             } catch (err) {
                 return { response: generateResponseObj(500, "Internal Server Error") }
@@ -214,7 +209,7 @@ const resolvers = {
         },
         getCreaterClassList: async (_, args, context) => {
             const { userId, pageNum } = args;
-            if ( !userId || !pageNum ) {
+            if ( !userId || pageNum === undefined || pageNum === null ) {
                 return { response: generateResponseObj(400, "Missing required arguments") }
             }
 
