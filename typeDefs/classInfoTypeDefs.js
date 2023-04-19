@@ -157,7 +157,14 @@ const typeDefs = `#graphql
         testCases: [TestCaseData]
     }
 
+    input GithubData {
+        repo: String
+        owner: String
+        accessToken: String
+    }
+
     input InputData {
+        price: Int
         ownerId: String
         className: String
         classDesc: String
@@ -172,6 +179,7 @@ const typeDefs = `#graphql
         studentOptions: [String]
         studentNumbers: Int
         status: Boolean
+        gitHub: GithubData
     }
 
     type Query {

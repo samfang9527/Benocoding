@@ -1,5 +1,4 @@
 
-import jwt from "jsonwebtoken";
 import { DB, UserClassInfo, ClassInfo, Chatroom } from "../models/database.js";
 import { PAGELIMIT, HOME_PAGELIMIT } from "../constant.js";
 import axios from "axios";
@@ -7,7 +6,7 @@ import escapeStringRegexp from "escape-string-regexp";
 import { jwtValidation } from "../utils/util.js";
 
 import {
-    addUserClass
+    addCreatedClass
 } from "../models/userModel.js";
 
 import {
@@ -94,7 +93,7 @@ const resolvers = {
         },
         getClassList: async (_, args, context) => {
             const { pageNum, keyword } = args;
-            if ( !pageNum ) {
+            if ( pageNum === undefined || pageNum === null ) {
                 return { response: generateResponseObj(400, "Missing required arguments") }
             }
 
@@ -115,7 +114,7 @@ const resolvers = {
                 .exec();
 
                 return {
-                    ...classData,
+                    classList: classData,
                     response: generateResponseObj(200, "ok")
                 };
 
@@ -379,7 +378,8 @@ const resolvers = {
                 teacherOptions,
                 studentOptions,
                 studentNumbers,
-                status
+                status,
+                teacherName: userData.username
             }
 
             // start transaction
@@ -400,23 +400,14 @@ const resolvers = {
                         classMembers: [userData]
                     });
 
-                    // create user class info
-                    const userClassInfoData = {
-                        userId: userData.userId,
-                        classId: classResult._id,
-                        milestones: newData.milestones
-                    }
-                    const userClassInfoResult = await createUserClassInfo(userClassInfoData);
-
                     // update user info
                     const classData = {
                         classId: classResult._id,
-                        userClassId: userClassInfoResult._id,
-                        className: classResult.className,
-                        role: "teacher",
-                        githubAccessToken: process.env.GITHUB_ACCESS_TOKEN
+                        className: newData.className,
+                        classImage: newData.classImage,
+                        classDesc: newData.classDesc
                     }
-                    await addUserClass(newData.ownerId, classData, newData.classTags);
+                    await addCreatedClass(newData.ownerId, classData, newData.classTags);
 
                     await session.commitTransaction();
 
