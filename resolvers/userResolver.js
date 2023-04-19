@@ -29,7 +29,7 @@ const resolvers = {
             const { token } = context;
             if ( !token ) {
                 return {
-                    status: 400,
+                    statusCode: 400,
                     responseMessage: "No tokens"
                 }
             }
@@ -37,7 +37,7 @@ const resolvers = {
             const result = jwtValidation(token);
             if ( Object.keys(result).length === 0 ) {
                 return {
-                    status: 401,
+                    statusCode: 401,
                     responseMessage: "Authentication failed"
                 }
             }
@@ -46,13 +46,13 @@ const resolvers = {
                 const info = await User.findById(id);
                 return {
                     ...info,
-                    status: 200,
+                    statusCode: 200,
                     responseMessage: "ok"
                 };
             } catch (err) {
                 console.error(err);
                 return {
-                    status: 500,
+                    statusCode: 500,
                     responseMessage: "Internal Server Error"
                 }
             }
@@ -61,7 +61,7 @@ const resolvers = {
             const { token } = context;
             if ( !token ) {
                 return {
-                    status: 400,
+                    statusCode: 400,
                     responseMessage: "No tokens"
                 }
             }
@@ -69,14 +69,14 @@ const resolvers = {
             const result = jwtValidation(token);
             if ( Object.keys(result).length === 0 ) {
                 return {
-                    status: 401,
+                    statusCode: 401,
                     responseMessage: "Authentication failed"
                 }
             }
 
             return {
                 ...result,
-                status: 200,
+                statusCode: 200,
                 responseMessage: "ok"
             }
         }
@@ -87,14 +87,14 @@ const resolvers = {
                 const { email, password } = args.data;
                 if ( !email || !password ) {
                     return {
-                        status: 400,
+                        statusCode: 400,
                         responseMessage: "Missing required informations"
                     }
                 }
 
                 if ( !validateEmail(email) || !validatePassword(password) ) {
                     return {
-                        status: 400,
+                        statusCode: 400,
                         responseMessage: "Wrong input format"
                     }
                 }
@@ -102,7 +102,7 @@ const resolvers = {
                 const data = await getUserDataByEmail(email);
                 if ( !data ) {
                     return {
-                        status: 401,
+                        statusCode: 401,
                         responseMessage: "Email not exists"
                     }
                 }
@@ -111,7 +111,7 @@ const resolvers = {
                 const passwordValid = await bcrypt.compare(password, hashedPassword);
                 if ( !passwordValid ) {
                     return {
-                        status: 401,
+                        statusCode: 401,
                         responseMessage: "Wrong password"
                     }
                 }
@@ -123,7 +123,7 @@ const resolvers = {
                 }
                 const token = jwt.sign(payload, process.env.JWT_PRIVATE_KEY, { expiresIn: "7d" });
                 return {
-                    status: 200,
+                    statusCode: 200,
                     responseMessage: "ok",
                     jwt: token
                 }
@@ -131,7 +131,7 @@ const resolvers = {
             } catch (err) {
                 console.error(err);
                 return {
-                    status: 500,
+                    statusCode: 500,
                     responseMessage: "Internal Server Error"
                 }
             }
@@ -141,8 +141,15 @@ const resolvers = {
                 const { username, email, password } = args.data;
                 if ( !username || !email || !password ) {
                     return {
-                        status: 400,
+                        statusCode: 400,
                         responseMessage: "Missing required informations"
+                    }
+                }
+
+                if ( !validateEmail(email) || !validatePassword(password) ) {
+                    return {
+                        statusCode: 400,
+                        responseMessage: "Wrong input format"
                     }
                 }
 
@@ -151,18 +158,18 @@ const resolvers = {
                 const payload = {
                     userId: result._id,
                     username: result.username,
-                    email: data.email
+                    email: result.email
                 }
                 const token = jwt.sign(payload, process.env.JWT_PRIVATE_KEY, { expiresIn: "7d" });
                 return {
-                    status: 200,
+                    statusCode: 200,
                     responseMessage: "ok",
                     jwt: token
                 }
             } catch (err) {
                 console.error(err);
                 return {
-                    status: 500,
+                    statusCode: 500,
                     responseMessage: "Internal Server Error"
                 }
             }

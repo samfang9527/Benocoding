@@ -52,7 +52,7 @@ const typeDefs = `#graphql
     }
 
     type Class {
-        status: Int
+        statusCode: Int
         responseMessage: String
         ownerId: String
         id: String

@@ -9,7 +9,7 @@ const typeDefs = `#graphql
     }
 
     type User {
-        status: Int
+        statusCode: Int
         responseMessage: String
         id: String
         username: String
@@ -20,13 +20,13 @@ const typeDefs = `#graphql
     }
 
     type Jwt {
-        status: Int
+        statusCode: Int
         responseMessage: String
         jwt: String
     }
 
     type JwtData {
-        status: Int
+        statusCode: Int
         responseMessage: String
         userId: String
         username: String
