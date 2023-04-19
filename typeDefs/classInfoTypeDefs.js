@@ -20,6 +20,11 @@ const DateType = new GraphQLScalarType({
 
 const typeDefs = `#graphql
     scalar Date
+    type Response {
+        statusCode: Int
+        responseMessage: String
+    }
+
     type TestCase {
         id: Int
         case: String
@@ -27,6 +32,11 @@ const typeDefs = `#graphql
         result: String
         method: String
         statusCode: String
+    }
+
+    type MilestoneResponse {
+        response: Response
+        milestones: [Milestone]
     }
 
     type Milestone {
@@ -52,8 +62,7 @@ const typeDefs = `#graphql
     }
 
     type Class {
-        statusCode: Int
-        responseMessage: String
+        response: Response
         ownerId: String
         id: String
         className: String
@@ -75,6 +84,16 @@ const typeDefs = `#graphql
         price: Int
     }
 
+    type ClassListResponse {
+        response: Response
+        classList: [Class]
+    }
+
+    type MessageResponse {
+        response: Response
+        messages: [Message]
+    }
+
     type Message {
         time: String
         from: String
@@ -83,6 +102,11 @@ const typeDefs = `#graphql
 
     type Messages {
         messages: [Message]
+    }
+
+    type GeneralPRResponse {
+        response: Response
+        data: [GeneralPRData]
     }
 
     type GeneralPRData {
@@ -97,6 +121,7 @@ const typeDefs = `#graphql
     }
 
     type DetailPRData {
+        response: Response
         body: String
         html_url: String
         state: String
@@ -106,6 +131,11 @@ const typeDefs = `#graphql
         deletions: Int
         mergeable: String
         diffData: String
+    }
+
+    type NumResponse {
+        response: Response
+        number: Int
     }
 
     input TestCaseData {
@@ -146,16 +176,16 @@ const typeDefs = `#graphql
 
     type Query {
         class(classId: String!): Class
-        milestones(classId: String!, userId: String!): [Milestone]
-        getMessages(chatroomId: String!): [Message]
-        getClassList(pageNum: Int!, keyword: String): [Class]
-        getRandomClasses: [Class]
-        getAllPageNums: Int 
-        getLearnerClassList(userId: String!, pageNum: Int!): [Class]
-        getCreaterClassList(userId: String!, pageNum: Int!): [Class]
-        getLearnerClassNums(userId: String!): Int
-        getCreaterClassNums(userId: String!): Int
-        getAllPullRequests(userId: String!, classId: String!): [GeneralPRData]
+        milestones(classId: String!, userId: String!): MilestoneResponse
+        getMessages(chatroomId: String!): MessageResponse
+        getClassList(pageNum: Int!, keyword: String): ClassListResponse
+        getRandomClasses: ClassListResponse
+        getAllPageNums: NumResponse
+        getLearnerClassList(userId: String!, pageNum: Int!): ClassListResponse
+        getCreaterClassList(userId: String!, pageNum: Int!): ClassListResponse
+        getLearnerClassNums(userId: String!): NumResponse
+        getCreaterClassNums(userId: String!): NumResponse
+        getAllPullRequests(userId: String!, classId: String!): GeneralPRResponse
         getPRDetail(userId: String!, classId: String!, number: Int!) : DetailPRData
     }
 
