@@ -5,6 +5,7 @@ import { User } from "../models/database.js";
 import {
     getUserDataByEmail
 } from "../models/userModel.js";
+import { jwtValidation } from "../utils/util.js";
 
 function validateUsername(username) {
     return 2 <= username.length <= 16;
@@ -25,21 +26,58 @@ function validatePassword(password) {
 const resolvers = {
     Query: {
         me: async (_, { id }, context) => {
-            const info = await User.findById(id);
-            return info;
+            const { token } = context;
+            if ( !token ) {
+                return {
+                    status: 400,
+                    responseMessage: "No tokens"
+                }
+            }
+
+            const result = jwtValidation(token);
+            if ( Object.keys(result).length === 0 ) {
+                return {
+                    status: 401,
+                    responseMessage: "Authentication failed"
+                }
+            }
+
+            try {
+                const info = await User.findById(id);
+                return {
+                    ...info,
+                    status: 200,
+                    responseMessage: "ok"
+                };
+            } catch (err) {
+                console.error(err);
+                return {
+                    status: 500,
+                    responseMessage: "Internal Server Error"
+                }
+            }
         },
         jwtValidate: async (_, args, context) => {
             const { token } = context;
-            try {
-                const decoded = jwt.verify(token, process.env.JWT_PRIVATE_KEY);
+            if ( !token ) {
                 return {
-                    userId: decoded.userId,
-                    username: decoded.username,
-                    email: decoded.email
+                    status: 400,
+                    responseMessage: "No tokens"
                 }
-            } catch (err) {
-                console.error(err);
-                return;
+            }
+
+            const result = jwtValidation(token);
+            if ( Object.keys(result).length === 0 ) {
+                return {
+                    status: 401,
+                    responseMessage: "Authentication failed"
+                }
+            }
+
+            return {
+                ...result,
+                status: 200,
+                responseMessage: "ok"
             }
         }
     },
@@ -47,54 +85,86 @@ const resolvers = {
         signin: async (_, args, context) => {
             try {
                 const { email, password } = args.data;
-                if ( validateEmail(email) && validatePassword(password) ) {
-                    const data = await getUserDataByEmail(email);
-                    if ( data ) {
-                        const hashedPassword = data.password;
-                        const passwordValid = await bcrypt.compare(password, hashedPassword);
-                        if ( !passwordValid ) {
-                            return;
-                        }
-
-                        const payload = {
-                            userId: data._id,
-                            username: data.username,
-                            email: data.email
-                        }
-                        const token = jwt.sign(payload, process.env.JWT_PRIVATE_KEY, { expiresIn: "7d" });
-                        return {
-                            "jwt": token
-                        }
+                if ( !email || !password ) {
+                    return {
+                        status: 400,
+                        responseMessage: "Missing required informations"
                     }
                 }
-                return;
+
+                if ( !validateEmail(email) || !validatePassword(password) ) {
+                    return {
+                        status: 400,
+                        responseMessage: "Wrong input format"
+                    }
+                }
+
+                const data = await getUserDataByEmail(email);
+                if ( !data ) {
+                    return {
+                        status: 401,
+                        responseMessage: "Email not exists"
+                    }
+                }
+
+                const hashedPassword = data.password;
+                const passwordValid = await bcrypt.compare(password, hashedPassword);
+                if ( !passwordValid ) {
+                    return {
+                        status: 401,
+                        responseMessage: "Wrong password"
+                    }
+                }
+
+                const payload = {
+                    userId: data._id,
+                    username: data.username,
+                    email: data.email
+                }
+                const token = jwt.sign(payload, process.env.JWT_PRIVATE_KEY, { expiresIn: "7d" });
+                return {
+                    status: 200,
+                    responseMessage: "ok",
+                    jwt: token
+                }
+
             } catch (err) {
                 console.error(err);
+                return {
+                    status: 500,
+                    responseMessage: "Internal Server Error"
+                }
             }
         },
         signup: async (_, args, context) => {
             try {
                 const { username, email, password } = args.data;
-                if ( validateUsername(username) && validateEmail(email) && validatePassword(password) ) {
-
-                    const hashedPassword = await bcrypt.hash(password, Number(process.env.BCRYPT_SALT_ROUNDS));
-                    console.log(hashedPassword);
-                    const result = await User.create( { username, email, password: hashedPassword } );
-                    if ( result ) {
-                        const payload = {
-                            userId: result._id,
-                            username: result.username,
-                            email: data.email
-                        }
-                        const token = jwt.sign(payload, process.env.JWT_PRIVATE_KEY, { expiresIn: "7d" });
-                        return {
-                            "jwt": token
-                        }
+                if ( !username || !email || !password ) {
+                    return {
+                        status: 400,
+                        responseMessage: "Missing required informations"
                     }
                 }
-                return;
+
+                const hashedPassword = await bcrypt.hash(password, Number(process.env.BCRYPT_SALT_ROUNDS));
+                const result = await User.create( { username, email, password: hashedPassword } );
+                const payload = {
+                    userId: result._id,
+                    username: result.username,
+                    email: data.email
+                }
+                const token = jwt.sign(payload, process.env.JWT_PRIVATE_KEY, { expiresIn: "7d" });
+                return {
+                    status: 200,
+                    responseMessage: "ok",
+                    jwt: token
+                }
             } catch (err) {
                 console.error(err);
+                return {
+                    status: 500,
+                    responseMessage: "Internal Server Error"
+                }
             }
         }
     }

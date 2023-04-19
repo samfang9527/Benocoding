@@ -4,24 +4,30 @@ const typeDefs = `#graphql
     type ClassInfo {
         classId: String
         className: String
-        role: String
-        githubAccessToken: String
+        classImage: String
+        classDesc: String
     }
 
     type User {
+        status: Int
+        responseMessage: String
         id: String
         username: String
         email: String
-        password: String
-        class: [ClassInfo]
+        createdClasses: [ClassInfo]
+        boughtClasses: [ClassInfo]
         tags: [String]
     }
 
     type Jwt {
+        status: Int
+        responseMessage: String
         jwt: String
     }
 
     type JwtData {
+        status: Int
+        responseMessage: String
         userId: String
         username: String
         email: String
