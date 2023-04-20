@@ -11,7 +11,22 @@ async function addCreatedClass(userId, classData, classTags) {
         })
 
         const result = await User.findByIdAndUpdate(userId, {$push: {"createdClasses": classData}, tags: tags}, {new: true});
-        console.log('userUpdated', result);
+        return result;
+    } catch (err) {
+        console.error(err);
+    }
+}
+
+async function addboughtClass(userId, classData, classTags) {
+    try {
+        const { tags } = await User.findById(userId);
+        classTags.forEach((ele) => {
+            if ( !tags.includes(ele) ) {
+                tags.push(ele);
+            }
+        })
+
+        const result = await User.findByIdAndUpdate(userId, {$push: {"boughtClasses": classData}, tags: tags}, {new: true});
         return result;
     } catch (err) {
         console.error(err);
@@ -41,6 +56,7 @@ async function getUserById(userId) {
 
 export {
     addCreatedClass,
+    addboughtClass,
     getUserDataByEmail,
     getUserById
 }

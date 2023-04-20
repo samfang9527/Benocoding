@@ -49,7 +49,9 @@ app.use('/api/1.0', autoTestRouter);
 app.use(
     '/graphql',
     expressMiddleware(server, {
-        context: async ({ req }) => ({ token: req.headers.token }),
+        context: async ({ req }) => {
+            return { token: req.headers.token }
+        },
     })
 );
 

@@ -1,12 +1,16 @@
 
-import { DB, UserClassInfo, ClassInfo, Chatroom, User } from "../models/database.js";
+import { DB, UserClassInfo, ClassInfo, Chatroom, User, Order } from "../models/database.js";
 import { PAGELIMIT, HOME_PAGELIMIT } from "../constant.js";
 import axios from "axios";
 import escapeStringRegexp from "escape-string-regexp";
 import { jwtValidation } from "../utils/util.js";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 import {
-    addCreatedClass
+    addCreatedClass,
+    addboughtClass
 } from "../models/userModel.js";
 
 import {
@@ -14,15 +18,8 @@ import {
     getClass
 } from "../models/classModel.js";
 
-import {
-    addUserToChatroom,
-    createChatroom
-} from "../models/chatroomModel.js";
-
-import {
-    createUserClassInfo,
-    getUserClassData
-} from "../models/userClassModel.js";
+import { createChatroom, addUserToChatroom } from "../models/chatroomModel.js";
+import { getUserClassData } from "../models/userClassModel.js";
 
 function generateResponseObj(statusCode, message) {
     return {
@@ -385,50 +382,50 @@ const resolvers = {
 
             // start transaction
             const session = await DB.startSession();
-            await session.withTransaction(async () => {
-                try {
-                    // create chatroom
-                    const chatroomResult = await createChatroom({
-                        messages: [],
-                        ownerId: newData.ownerId,
-                        members: [userData]
-                    })
+            session.startTransaction()
+            try {
+                // create chatroom
+                const chatroomResult = await createChatroom({
+                    messages: [],
+                    ownerId: newData.ownerId,
+                    members: [userData]
+                })
 
-                    // create general class info
-                    const classResult = await createClassInfo({
-                        ...newData,
-                        chatroomId: chatroomResult._id,
-                        classMembers: [userData]
-                    });
+                // create general class info
+                const classResult = await createClassInfo({
+                    ...newData,
+                    chatroomId: chatroomResult._id,
+                    classMembers: [userData]
+                });
 
-                    // update user info
-                    const classData = {
-                        classId: classResult._id,
-                        className: newData.className,
-                        classImage: newData.classImage,
-                        classDesc: newData.classDesc
-                    }
-                    await addCreatedClass(newData.ownerId, classData, newData.classTags);
-
-                    await session.commitTransaction();
-
-                    return {
-                        ...newData,
-                        response: generateResponseObj(200, "ok")
-                    }
-
-                } catch (err) {
-                    console.error(err);
-                    await session.abortTransaction();
-                    return { response: generateResponseObj(500, "Internal Server Error") }
-                } finally {
-                    await session.endSession();
+                // update user info
+                const classData = {
+                    classId: classResult._id,
+                    className: newData.className,
+                    classImage: newData.classImage,
+                    classDesc: newData.classDesc
                 }
-            })
+                await addCreatedClass(newData.ownerId, classData, newData.classTags);
+
+                await session.commitTransaction();
+
+                return {
+                    ...newData,
+                    response: generateResponseObj(200, "ok")
+                }
+
+            } catch (err) {
+                console.error(err);
+                await session.abortTransaction();
+                return { response: generateResponseObj(500, "Internal Server Error") }
+            } finally {
+                await session.endSession();
+            }
         },
         buyClass: async (_, args, context) => {
-            const { classId } = args;
-            if ( !classId ) {
+            const { prime, classId} = args;
+            const { token } = context;
+            if ( !prime || !classId || !token ) {
                 return { response: generateResponseObj(400, "Missing required arguments") }
             }
 
@@ -437,58 +434,110 @@ const resolvers = {
             if ( Object.keys(userData).length === 0 ) {
                 return { response: generateResponseObj(401, "Authentication failed") }
             }
-            console.log('userData', userData);
 
             // check if already buy this class
             const classInfo = await getClass(classId);
-            for ( let i = 0; i < classInfo.classMembers; i++) {
-                if ( classInfo.classMembers[i].userId === userData.userId ) {
-                    return generateResponseObj(409, "Already bought the class")
+            const { classMembers } = classInfo;
+            for ( let i = 0; i < classMembers.length; i++) {
+                if ( classMembers[i].userId === userData.userId ) {
+                    return { response: generateResponseObj(409, "Already bought the class") }
                 }
             }
 
             // start transaction
             const session = await DB.startSession();
-            await session.withTransaction(async () => {
-                try {
-                    // create userClass data
-                    const userClassResult = await UserClassInfo.create({
-                        userId: userData.userId,
-                        classId: classInfo._id,
-                        milestones: classInfo.milestones
-                    })
-                    console.log('userClassResult', userClassResult);
-    
-                    // Update user class
-                    const classData = {
-                        classId: classInfo._id,
-                        className: classInfo.className,
-                        role: 'student',
-                        githubAccessToken: process.env.GITHUB_ACCESS_TOKEN
-                    }
-                    const userUpdatedResult = await addUserClass(userData.userId, classData, classInfo.classTags);
-                    console.log('userUpdatedResult', userUpdatedResult);
-    
-                    // update chatroom
-                    const chatroomResult = await addUserToChatroom(classInfo.chatroomId, userData);
-                    console.log('chatroomResult', chatroomResult);
-    
-                    // update class student number
-                    await ClassInfo.findByIdAndUpdate(classId, {
-                        $inc: {"studentNumbers": 1},
-                        $push: {"classMembers": userData}
-                    });
-
-                    await session.commitTransaction();
-                    return generateResponseObj(200, "ok")
-                    
-                } catch (err) {
-                    await session.abortTransaction();
-                    return { response: generateResponseObj(500, "Internal Server Error") }
-                } finally {
-                    await session.endSession();
+            const transactionOptions = {
+                readConcern: { level: 'snapshot' },
+                writeConcern: { w: 'majority' },
+            };
+            session.startTransaction(transactionOptions);
+            try {
+                // create order
+                const orderData = {
+                    username: userData.username,
+                    userId: userData.userId,
+                    orderStatus: "unpaid",
+                    orderPrice: classInfo.price,
+                    orderDetail: [
+                        {
+                            classId: classId,
+                            className: classInfo.className,
+                            createrId: classInfo.ownerId,
+                            teacherName: classInfo.teacherName,
+                            price: classInfo.price
+                        }
+                    ],
+                    createdDate: new Date().toISOString(),
+                    payment: "credit card"
                 }
-            })
+                const orderResult = await Order.create(orderData);
+                console.log(orderResult);
+
+                // start payment
+                const paymentResult = await axios({
+                    method: 'post',
+                    url: 'https://sandbox.tappaysdk.com/tpc/payment/pay-by-prime',
+                    headers: {
+                        "Content-Type": "application/json",
+                        "x-api-key": process.env.TAPPAY_PARTNER_KEY
+                    },
+                    data: {
+                        "prime": prime,
+                        "partner_key": process.env.TAPPAY_PARTNER_KEY,
+                        "merchant_id": process.env.TAPPAY_MERCHANT_ID,
+                        "details": "TapPay Test",
+                        "amount": classInfo.price,
+                        "cardholder": {
+                            "phone_number": "0900000000",
+                            "name": userData.username,
+                            "email": userData.email,
+                        }
+                    }
+                });
+                if ( paymentResult.data.status !== 0 ) {
+                    return { response: generateResponseObj(500, paymentResult.data.msg) }
+                }
+
+                // update order status
+                await Order.findByIdAndUpdate(orderResult._id, { orderStatus: "paid" })
+
+                // create userClass data
+                const userClassResult = await UserClassInfo.create({
+                    userId: userData.userId,
+                    classId: classInfo._id,
+                    milestones: classInfo.milestones
+                })
+                console.log('userClassResult', userClassResult);
+
+                // Update user class
+                const classData = {
+                    classId: classInfo._id,
+                    className: classInfo.className,
+                    classImage: classInfo.classImage,
+                    classDesc: classInfo.classDesc
+                }
+                const userUpdatedResult = await addboughtClass(userData.userId, classData, classInfo.classTags);
+                console.log('userUpdatedResult', userUpdatedResult);
+
+                // update chatroom
+                const chatroomResult = await addUserToChatroom(classInfo.chatroomId, userData);
+                console.log('chatroomResult', chatroomResult);
+
+                // update class student number
+                await ClassInfo.findByIdAndUpdate(classId, {
+                    $inc: {"studentNumbers": 1},
+                    $push: {"classMembers": userData}
+                });
+
+                await session.commitTransaction();
+                return { response: generateResponseObj(200, "ok") }
+                
+            } catch (err) {
+                await session.abortTransaction();
+                return { response: generateResponseObj(500, "Internal Server Error") }
+            } finally {
+                await session.endSession();
+            }
         }
     }
 };

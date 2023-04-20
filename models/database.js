@@ -4,6 +4,7 @@ import { userSchema } from "./schemas/userSchema.js";
 import { classInfoSchema } from "./schemas/classInfoSchema.js";
 import { userClassInfoSchema } from "./schemas/userClassInfoSchema.js";
 import { chatroomSchema } from "./schemas/chatroomSchema.js";
+import { orderSchema } from "./schemas/orderSchema.js";
 
 dotenv.config();
 
@@ -24,11 +25,13 @@ const User = mongoose.model('user', userSchema);
 const ClassInfo = mongoose.model('classInfo', classInfoSchema);
 const UserClassInfo = mongoose.model('userClassInfo', userClassInfoSchema);
 const Chatroom = mongoose.model('chatroom', chatroomSchema);
+const Order = mongoose.model('orders', orderSchema);
 
 export {
     mongoose as DB,
     User,
     ClassInfo,
     UserClassInfo,
-    Chatroom
+    Chatroom,
+    Order
 };

@@ -199,7 +199,7 @@ const typeDefs = `#graphql
 
     type Mutation {
         createClass(data: InputData!): Class
-        buyClass(classId: String!): Class
+        buyClass(prime: String!, classId: String!): Class
     }
 `;
 
