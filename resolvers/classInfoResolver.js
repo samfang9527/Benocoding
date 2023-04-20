@@ -50,13 +50,19 @@ const resolvers = {
         milestones: async (_, args, context) => {
             const { classId, userId } = args;
             if ( !classId || !userId ) {
-                return { response: generateResponseObj(400, "Missing required arguments") }
+                return {
+                    response: generateResponseObj(400, "Missing required arguments"),
+                    milestones: []
+                }
             }
 
             try {
                 const [ info ] = await getUserClassData(classId, userId);
                 if ( !info ) {
-                    return { response: generateResponseObj(200, "No matched data") }
+                    return {
+                        response: generateResponseObj(200, "No matched data"),
+                        milestones: []
+                    }
                 }
 
                 return {
