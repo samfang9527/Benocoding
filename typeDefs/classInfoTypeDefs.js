@@ -89,6 +89,21 @@ const typeDefs = `#graphql
         classList: [Class]
     }
 
+    type UserClass {
+        classId: String
+        classImage: String
+        className: String
+        classDesc: String
+        teacherName: String
+        classStartDate: Date
+    }
+
+    type UserClassListResponse {
+        response: Response
+        classList: [UserClass]
+        maxPageNum: Int
+    }
+
     type MessageResponse {
         response: Response
         messages: [Message]
@@ -189,10 +204,8 @@ const typeDefs = `#graphql
         getClassList(pageNum: Int!, keyword: String): ClassListResponse
         getRandomClasses: ClassListResponse
         getAllPageNums: NumResponse
-        getLearnerClassList(userId: String!, pageNum: Int!): ClassListResponse
-        getCreaterClassList(userId: String!, pageNum: Int!): ClassListResponse
-        getLearnerClassNums(userId: String!): NumResponse
-        getCreaterClassNums(userId: String!): NumResponse
+        getLearnerClassList(userId: String!, pageNum: Int!): UserClassListResponse
+        getCreaterClassList(userId: String!, pageNum: Int!): UserClassListResponse
         getAllPullRequests(userId: String!, classId: String!): GeneralPRResponse
         getPRDetail(userId: String!, classId: String!, number: Int!) : DetailPRData
     }

@@ -23,12 +23,15 @@ const userSchema = mongoose.Schema({
         classImage: String,
         className: String,
         classDesc: String,
+        classStartDate: Date
     }],
     boughtClasses: [{
         classId: String,
         classImage: String,
         className: String,
         classDesc: String,
+        teacherName: String,
+        classStartDate: Date
     }],
     tags: [String]
 }, { collection: 'users' } );

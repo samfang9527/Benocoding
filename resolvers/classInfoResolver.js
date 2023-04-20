@@ -151,64 +151,27 @@ const resolvers = {
                 return { response: generateResponseObj(500, "Internal Server Error") }
             }
         },
-        getLearnerClassNums: async (_, args, context) => {
-            try {
-                const { userId } = args;
-                const userClassNums = await UserClassInfo.find({
-                    userId: userId
-                })
-                .countDocuments();
-    
-                return {
-                    response: generateResponseObj(200, "ok"),
-                    number: Math.ceil(userClassNums / PAGELIMIT)
-                }
-            } catch (err) {
-                return { response: generateResponseObj(500, "Internal Server Error") }
-            }
-        },
         getLearnerClassList: async (_, args, context) => {
             const { userId, pageNum } = args;
-            if ( !userId || !pageNum ) {
+            if ( !userId || pageNum === undefined || pageNum === null ) {
                 return { response: generateResponseObj(400, "Missing required arguments") }
             }
 
             try {
                 // calculate page range
                 const offset = pageNum * PAGELIMIT;
-                const responseData = await ClassInfo.find({
-                    ownerId: { $ne: userId }, // userId 不等於 ownerId
-                    classMembers: { $elemMatch: { userId: userId } } // classMembers 陣列內包含 userId 的物件
-                })
-                .skip(offset)
-                .limit(PAGELIMIT)
-                .exec();
+                const responseData = await User.findById(userId);
+                const { boughtClasses } = responseData;
 
                 return {
                     response: generateResponseObj(200, "ok"),
-                    classList: responseData
+                    classList: boughtClasses.slice(offset, offset + PAGELIMIT),
+                    maxPageNum: Math.ceil(boughtClasses.length / PAGELIMIT)
                 }
             } catch (err) {
                 return { response: generateResponseObj(500, "Internal Server Error") }
             }
             
-        },
-        getCreaterClassNums: async (_, args, context) => {
-            const { userId } = args;
-            if ( !userId ) {
-                return { response: generateResponseObj(400, "Missing required arguments") }
-            }
-
-            try {
-                // get all class data
-                const userData = await User.findById(userId);
-                return {
-                    response: generateResponseObj(200, "ok"),
-                    number: Math.ceil( userData.createdClasses.length / PAGELIMIT )
-                }
-            } catch (err) {
-                return { response: generateResponseObj(500, "Internal Server Error") }
-            }
         },
         getCreaterClassList: async (_, args, context) => {
             const { userId, pageNum } = args;
@@ -220,16 +183,13 @@ const resolvers = {
             const offset = pageNum * PAGELIMIT;
 
             try {
-                const classData = await ClassInfo.find({
-                    ownerId: userId,
-                })
-                .skip(offset)
-                .limit(PAGELIMIT)
-                .exec();
+                const responseData = await User.findById(userId);
+                const { createdClasses } = responseData;
                 
                 return {
                     response: generateResponseObj(200, "ok"),
-                    classList: classData
+                    classList: createdClasses.slice(offset, offset + PAGELIMIT),
+                    maxPageNum: Math.ceil(createdClasses.length / PAGELIMIT)
                 }
             } catch (err) {
                 return { response: generateResponseObj(500, "Internal Server Error") }
@@ -514,7 +474,9 @@ const resolvers = {
                     classId: classInfo._id,
                     className: classInfo.className,
                     classImage: classInfo.classImage,
-                    classDesc: classInfo.classDesc
+                    classDesc: classInfo.classDesc,
+                    classStartDate: classInfo.classStartDate,
+                    teacherName: classInfo.teacherName
                 }
                 const userUpdatedResult = await addboughtClass(userData.userId, classData, classInfo.classTags);
                 console.log('userUpdatedResult', userUpdatedResult);
