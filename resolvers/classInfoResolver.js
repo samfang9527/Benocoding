@@ -500,6 +500,55 @@ const resolvers = {
             } finally {
                 await session.endSession();
             }
+        },
+        updateClass: async (_, args, context) => {
+            const { token } = context;
+            const { data, classId } = args;
+
+            // args check
+            if ( !data || !token ) {
+                return { response: generateResponseObj(400, "Missing required arguments") }
+            }
+
+            // verify jwt
+            const userData = jwtValidation(token);
+            if ( Object.keys(userData).length === 0 ) {
+                return { response: generateResponseObj(401, "Authentication failed") }
+            }
+
+            try {
+                const classData = await ClassInfo.findById(classId);
+                if ( !classData ) {
+                    return { response: generateResponseObj(400, "Wrong classId") }
+                }
+
+                if ( classData.ownerId !== userData.userId ) {
+                    return { response: generateResponseObj(403, "Forbidden") }
+                }
+
+                await ClassInfo.updateOne(
+                    { _id: classId, ownerId: userData.userId },
+                    { $set: data }
+                )
+
+                const updateObj = {...data};
+                Object.keys(updateObj).forEach((key) => {
+                    updateObj[`createdClasses.$.${key}`] = updateObj[key];
+                    delete updateObj[key];
+                })
+                await User.findOneAndUpdate(
+                    { _id: userData.userId, 'createdClasses.classId': classId },
+                    { $set: updateObj }
+                )
+                
+                return {
+                    ...data,
+                    response: generateResponseObj(200, "updated")
+                }
+            } catch (err) {
+                console.error(err);
+                return { response: generateResponseObj(500, "Internal Server Error") }
+            }
         }
     }
 };

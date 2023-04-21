@@ -153,6 +153,16 @@ const typeDefs = `#graphql
         number: Int
     }
 
+    type UpdateResponse {
+        response: Response
+        className: String
+        classDesc: String
+        classStartDate: Date
+        classEndDate: Date
+        classImage: String
+        classVideo: String
+    }
+
     input TestCaseData {
         id: Int
         case: String
@@ -197,6 +207,15 @@ const typeDefs = `#graphql
         gitHub: GithubData
     }
 
+    input UpdateData {
+        className: String
+        classDesc: String
+        classStartDate: Date
+        classEndDate: Date
+        classImage: String
+        classVideo: String
+    }
+
     type Query {
         class(classId: String!): Class
         milestones(classId: String!, userId: String!): MilestoneResponse
@@ -213,6 +232,7 @@ const typeDefs = `#graphql
     type Mutation {
         createClass(data: InputData!): Class
         buyClass(prime: String!, classId: String!): Class
+        updateClass(data: UpdateData!, classId: String!): UpdateResponse
     }
 `;
 
