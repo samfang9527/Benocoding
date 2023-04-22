@@ -4,13 +4,12 @@ import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import crypto from "crypto";
 import dotenv from "dotenv";
 
-dotenv.config({ path:'../.env' });
+dotenv.config();
 
 const region = process.env.AWS_S3_BUCKET_REGION;
 const bucketName = process.env.AWS_S3_BUCKET_NAME;
 const accessKey = process.env.AWS_S3_ACCESS_KEY;
 const secretAccessKey = process.env.AWS_S3_SECRET_ACCESS_KEY;
-
 
 const s3 = new S3Client({
     region: region,

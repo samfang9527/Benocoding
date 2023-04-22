@@ -363,7 +363,9 @@ const resolvers = {
                     classId: classResult._id,
                     className: newData.className,
                     classImage: newData.classImage,
-                    classDesc: newData.classDesc
+                    classDesc: newData.classDesc,
+                    classStartDate: newData.classStartDate,
+                    teacherName: newData.teacherName
                 }
                 await addCreatedClass(newData.ownerId, classData, newData.classTags);
 
