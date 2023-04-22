@@ -28,6 +28,7 @@ export function initialRedisPubSub(io) {
         host: ELASTICACHED_HOST,
         username: ELASTICACHED_USER,
         password: ELASTICACHED_PWD,
+        tls: {}
     });
 
     const redisSub = redisPub.duplicate();
