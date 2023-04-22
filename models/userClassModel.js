@@ -11,7 +11,6 @@ async function getUserClassData(classId, userId) {
             classId: classId,
             userId: userId
         })
-        console.log('data', data);
         return data;
     } catch (err) {
         console.error(err);

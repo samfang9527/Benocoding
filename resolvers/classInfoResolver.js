@@ -431,7 +431,6 @@ const resolvers = {
                     payment: "credit card"
                 }
                 const orderResult = await Order.create(orderData);
-                console.log(orderResult);
 
                 // start payment
                 const paymentResult = await axios({
