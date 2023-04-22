@@ -1,7 +1,7 @@
 
 import { Server } from "socket.io";
 import { DOMAIN } from "../constant.js";
-import { initialRedisPubSub, initialRedis } from "./cache.js";
+import { initialRedisPubSub } from "./cache.js";
 import { Chatroom } from "../models/database.js";
 import { Configuration, OpenAIApi } from "openai";
 import { createAdapter } from "@socket.io/redis-adapter";
@@ -11,12 +11,7 @@ export async function initialSocketIO(httpServer) {
         cors: DOMAIN
     });
 
-    // const { pub, sub } = initialRedisPubSub(io);
-    const redisPub = initialRedis();
-    const redisSub = redisPub.duplicate();
-
-    redisPub.on("connect", () => console.log('redisPub connect!'))
-    redisSub.on("connect", () => console.log('redisSub connect!'))
+    const { redisPub, redisSub } = initialRedisPubSub(io);
     io.adapter(createAdapter(redisPub, redisSub));
 
     redisSub.on("message", (channel, msgData) => {
@@ -51,6 +46,11 @@ export async function initialSocketIO(httpServer) {
         });
       
         socket.on("sendMessage", async (chatroomId, msgData) => {
+            // store message to db
+            await Chatroom.findByIdAndUpdate(chatroomId, {
+                $push: { messages: JSON.parse(msgData) }
+            })
+
             await redisPub.publish(chatroomId, msgData);
             console.log(`user: ${socket.id} publish ${msgData}`);
         });

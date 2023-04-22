@@ -36,23 +36,10 @@ export function initialRedisPubSub(io) {
     redisSub.on("ready", () => { console.log('redisSub is ready') });
 
     return {
-        pub: redisPub,
-        sub: redisSub
+        redisPub: redisPub,
+        redisSub: redisSub
     }
 }
-
-export function initialRedis() {
-
-    const redis = new Redis({
-        port: LOCAL_REDIS_PORT,
-        host: LOCAL_REDIS_HOST,
-        username: LOCAL_REDIS_USER,
-        password: LOCAL_REDIS_PWD,
-    });
-
-    return redis;
-}
-
 
 
 // aws
