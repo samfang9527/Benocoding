@@ -8,7 +8,11 @@ import { createAdapter } from "@socket.io/redis-adapter";
 
 export function createIOServer(httpServer) {
     const io = new Server(httpServer, {
-        cors: DOMAIN
+        cors: {
+            origin: [DOMAIN],
+            methods: ["GET", "POST"],
+            credentials: true
+        }
     });
     return io;
 }
