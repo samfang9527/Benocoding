@@ -6,6 +6,9 @@ import {
     getUserDataByEmail
 } from "../models/userModel.js";
 import { jwtValidation } from "../utils/util.js";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 function validateUsername(username) {
     return 2 <= username.length <= 16;

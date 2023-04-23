@@ -15,8 +15,7 @@ const userSchema = mongoose.Schema({
         maxLength: [128, 'email can\'t be greater than 128 characters'],
     },
     password: {
-        type: String,
-        require: [true, 'password is required'],
+        type: String
     },
     createdClasses: [{
         classId: String,

@@ -19,6 +19,7 @@ import { resolvers as classInfoResolvers } from "./resolvers/classInfoResolver.j
 
 // express router
 import { autoTestRouter } from "./routes/autoTest_route.js";
+import { gitHubRouter } from "./routes/github_route.js";
 
 dotenv.config();
 
@@ -45,7 +46,7 @@ console.log(`🚀 Server ready at ${API_DOMAIN}/graphql`);
 app.use(cors());
 app.use(express.json());
 app.use(express.static('public'));
-app.use('/api/1.0', autoTestRouter);
+app.use('/api/1.0', autoTestRouter, gitHubRouter);
 
 app.use(
     '/graphql',
