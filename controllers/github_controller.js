@@ -48,7 +48,7 @@ export const callback = async (req, res) => {
                 email: userData.data.email
             }
             const token = jwt.sign(payload, JWT_PRIVATE_KEY, { expiresIn: "7d" });
-            res.cookie('jwt', token);
+            res.cookie('jwt', token, { domain: '.benocoding.com' });
             return res.redirect(DOMAIN);
         }
 
