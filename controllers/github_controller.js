@@ -47,6 +47,8 @@ export const callback = async (req, res) => {
                 username: userData.data.username,
                 email: userData.data.email
             }
+            const token = jwt.sign(payload, JWT_PRIVATE_KEY, { expiresIn: "7d" });
+            res.cookie('jwt', token);
             return res.redirect(DOMAIN);
         }
 
