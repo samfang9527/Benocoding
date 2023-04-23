@@ -6,10 +6,14 @@ import { Chatroom } from "../models/database.js";
 import { Configuration, OpenAIApi } from "openai";
 import { createAdapter } from "@socket.io/redis-adapter";
 
-export async function initialSocketIO(httpServer) {
+export function createIOServer(httpServer) {
     const io = new Server(httpServer, {
         cors: DOMAIN
     });
+    return io;
+}
+
+export async function initialSocketIO(io) {
 
     const { redisPub, redisSub } = initialRedisPubSub(io);
     io.adapter(createAdapter(redisPub, redisSub));

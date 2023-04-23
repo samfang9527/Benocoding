@@ -44,7 +44,7 @@ export const callback = async (req, res) => {
         if ( user ) {
             payload = {
                 userId: user._id,
-                username: userData.data.username,
+                username: userData.data.name,
                 email: userData.data.email
             }
             const token = jwt.sign(payload, JWT_PRIVATE_KEY, { expiresIn: "7d" });

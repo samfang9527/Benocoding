@@ -7,7 +7,7 @@ import http from "http";
 import cors from "cors";
 import { generateUploadURL } from "./utils/s3.js";
 import { API_DOMAIN, DOMAIN } from "./constant.js";
-import { initialSocketIO } from "./utils/socket.js";
+import { createIOServer, initialSocketIO } from "./utils/socket.js";
 
 // typeDefs
 import { typeDefs as userTypeDefs } from "./typeDefs/userTypeDefs.js";
@@ -29,7 +29,8 @@ const port = process.env.MAIN_SERVER_PORT;
 const httpServer = http.createServer(app);
 
 // socket.io
-initialSocketIO(httpServer);
+const io = createIOServer(httpServer);
+initialSocketIO(io);
 
 // Apollo server for GraphQL
 const server = new ApolloServer({
@@ -69,3 +70,4 @@ app.use((req, res) => {
     res.status(404).json('page not found');
 })
 
+export { io };
