@@ -1,6 +1,6 @@
 
 import { Server } from "socket.io";
-import { DOMAIN } from "../constant.js";
+import { DOMAIN, WWWDOMAIN } from "../constant.js";
 import { initialRedisPubSub } from "./cache.js";
 import { Chatroom } from "../models/database.js";
 import { Configuration, OpenAIApi } from "openai";
@@ -9,7 +9,7 @@ import { createAdapter } from "@socket.io/redis-adapter";
 export function createIOServer(httpServer) {
     const io = new Server(httpServer, {
         cors: {
-            origin: [DOMAIN],
+            origin: [DOMAIN, WWWDOMAIN],
             methods: ["GET", "POST"],
             credentials: true
         }
