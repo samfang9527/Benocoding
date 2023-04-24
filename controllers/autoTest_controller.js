@@ -3,6 +3,7 @@ import { exec } from "child_process";
 import { v4 as uuidv4 } from 'uuid';
 import axios from "axios";
 import { UserClassInfo } from "../models/database.js";
+import fs from "fs";
 
 function isUrl(string) {
     const urlRegex = /^(?:http|https):\/\/[\w\-]+(?:\.[\w\-]+)+[\w\-.,@?^=%&:/~+#]*$/;
@@ -27,11 +28,13 @@ export const functionTest = async (req, res) => {
             const { inputs, result } = testCase;
             const parsedResult = JSON.parse(result);
             const containerName = uuidv4();
+
             const command = `
             docker run \
                 --name ${containerName} \
                 -v $(pwd)/${filePath}:/app/${filename} \
-                -e INPUT=${inputs} \
+                -e INPUT1=${inputs[0]} \
+                -e INPUT2=${inputs[1]} \
                 node:18-alpine node /app/${filename} ${functionName}`;
             exec(command, (error, stdout, stderr) => {
                 stdout = stdout.trim();
@@ -44,7 +47,7 @@ export const functionTest = async (req, res) => {
     
                     const resultObj = {
                         case: JSON.parse(testCase.case),
-                        inputs: JSON.parse(testCase.inputs),
+                        inputs: inputs,
                         passed: false,
                         execResult: stdout,
                         expectedResult: parsedResult
@@ -59,6 +62,16 @@ export const functionTest = async (req, res) => {
             })
         })
     }));
+
+    // remove file
+    fs.unlink(filePath, (err) => {
+        if ( err ) {
+            console.error(err)
+            return;
+        }
+        console.log('file removed');
+    })
+
     console.log(testResults);
     for ( let i = 0; i < testResults.length; i++ ) {
         if ( !testResults[i].passed ) {
@@ -71,6 +84,9 @@ export const functionTest = async (req, res) => {
         { $set: { [`milestones.${milestoneIdx}.passed`]: true } },
         { new: true }
     );
+
+    
+
     res.status(200).json({testResults});
 }
 

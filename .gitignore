@@ -2,9 +2,6 @@
 # modules
 node_modules/
 
-# test files
-autoTestFiles/
-
 # env
 .env
 

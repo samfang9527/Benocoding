@@ -28,7 +28,7 @@ const typeDefs = `#graphql
     type TestCase {
         id: Int
         case: String
-        inputs: String
+        inputs: [String]
         result: String
         method: String
         statusCode: String
@@ -46,6 +46,7 @@ const typeDefs = `#graphql
         passed: Boolean
         functionTest: Boolean
         functionName: String
+        functionTemplate: String
         testCases: [TestCase]
     }
 
@@ -166,7 +167,7 @@ const typeDefs = `#graphql
     input TestCaseData {
         id: Int
         case: String
-        inputs: String
+        inputs: [String]
         result: String
         method: String
         statusCode: String
@@ -179,6 +180,7 @@ const typeDefs = `#graphql
         passed: Boolean
         functionTest: Boolean
         functionName: String
+        functionTemplate: String
         testCases: [TestCaseData]
     }
 

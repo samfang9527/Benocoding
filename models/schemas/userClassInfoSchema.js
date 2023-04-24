@@ -22,9 +22,10 @@ const userClassInfoSchema = mongoose.Schema({
         functionTest: Boolean,
         passed: Boolean,
         functionName: String,
+        functionTemplate: String,
         testCases: [{
             case: String,
-            inputs: String,
+            inputs: [String],
             result: String,
             method: String,
             statusCode: String
