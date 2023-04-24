@@ -9,7 +9,7 @@ import { createAdapter } from "@socket.io/redis-adapter";
 export function createIOServer(httpServer) {
     const io = new Server(httpServer, {
         cors: {
-            origin: [DOMAIN, WWWDOMAIN],
+            origin: [DOMAIN, WWWDOMAIN, "http://localhost:3000"],
             methods: ["GET", "POST"],
             credentials: true
         }
