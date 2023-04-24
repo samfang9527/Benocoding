@@ -30,7 +30,7 @@ export const functionTest = async (req, res) => {
             const containerName = uuidv4();
 
             const command = `
-            docker run \
+            sudo docker run \
                 --name ${containerName} \
                 -v $(pwd)/${filePath}:/app/${filename} \
                 -e INPUT1=${inputs[0]} \
