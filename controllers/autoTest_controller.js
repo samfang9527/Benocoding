@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 import axios from "axios";
 import { UserClassInfo } from "../models/database.js";
 import fs from "fs";
+import { log } from "console";
 
 function isUrl(string) {
     const urlRegex = /^(?:http|https):\/\/[\w\-]+(?:\.[\w\-]+)+[\w\-.,@?^=%&:/~+#]*$/;
@@ -22,72 +23,71 @@ export const functionTest = async (req, res) => {
 
     const { path: filePath, filename } = file;
 
-    // run all test cases
-    const testResults = await Promise.all(testCases.map((testCase) => {
-        return new Promise((resolve, reject) => {
-            const { inputs, result } = testCase;
-            const parsedResult = JSON.parse(result);
-            const containerName = uuidv4();
-
-            const command = `
-            sudo docker run \
-                --name ${containerName} \
-                -v $(pwd)/${filePath}:/app/${filename} \
-                -e INPUT1=${inputs[0]} \
-                -e INPUT2=${inputs[1]} \
-                node:18-alpine node /app/${filename} ${functionName}`;
-            exec(command, (error, stdout, stderr) => {
-                stdout = stdout.trim();
-                if ( error ) {
-                    console.error(error);
-                    reject(error);
-                } else {
-                    console.log('exec result', stdout);
-                    console.log('expected result', parsedResult);
+    try {
+        // run all test cases
+        const testResults = await Promise.all(testCases.map((testCase) => {
+            return new Promise((resolve, reject) => {
+                const { inputs, result } = testCase;
+                const parsedResult = JSON.parse(result);
+                const containerName = uuidv4();
     
-                    const resultObj = {
-                        case: JSON.parse(testCase.case),
-                        inputs: inputs,
-                        passed: false,
-                        execResult: stdout,
-                        expectedResult: parsedResult
+                const command = `
+                sudo docker run \
+                    --rm \
+                    --name ${containerName} \
+                    -v $(pwd)/${filePath}:/app/${filename} \
+                    -e INPUT1=${inputs[0]} \
+                    -e INPUT2=${inputs[1]} \
+                    node:18-alpine node /app/${filename} ${functionName}`;
+                exec(command, (error, stdout, stderr) => {
+                    stdout = stdout.trim();
+                    if ( error ) {
+                        reject(error);
+                    } else {
+                        const resultObj = {
+                            case: JSON.parse(testCase.case),
+                            inputs: inputs,
+                            passed: false,
+                            execResult: stdout,
+                            expectedResult: parsedResult
+                        }
+        
+                        if ( stdout.trim() === parsedResult ) {
+                            resultObj.passed = true;
+                        }
+                        resolve(resultObj);
                     }
-    
-                    if ( stdout.trim() === parsedResult ) {
-                        resultObj.passed = true;
-                    }
-                    exec(`docker rm ${containerName}`);
-                    resolve(resultObj);
-                }
+                })
             })
+        }));
+
+        console.log(testResults);
+        for ( let i = 0; i < testResults.length; i++ ) {
+            if ( !testResults[i].passed ) {
+                return res.status(200).json({testResults});
+            }
+        }
+        // update milestone passed to true
+        const result = await UserClassInfo.updateOne(
+            { classId: classId, userId: userId },
+            { $set: { [`milestones.${milestoneIdx}.passed`]: true } },
+            { new: true }
+        );
+        res.status(200).json({testResults});
+
+    } catch (err) {
+        console,log(1);
+        return res.status(400).json({err: err});
+    } finally {
+        // remove file
+        fs.unlink(filePath, (err) => {
+            if ( err ) {
+                console.error(err)
+                return;
+            }
+            console.log('file removed');
         })
-    }));
-
-    // remove file
-    fs.unlink(filePath, (err) => {
-        if ( err ) {
-            console.error(err)
-            return;
-        }
-        console.log('file removed');
-    })
-
-    console.log(testResults);
-    for ( let i = 0; i < testResults.length; i++ ) {
-        if ( !testResults[i].passed ) {
-            return res.status(200).json({testResults});
-        }
     }
-    // update milestone passed to true
-    const result = await UserClassInfo.updateOne(
-        { classId: classId, userId: userId },
-        { $set: { [`milestones.${milestoneIdx}.passed`]: true } },
-        { new: true }
-    );
-
-    
-
-    res.status(200).json({testResults});
 }
 
 export const apiTest = async (req, res) => {
