@@ -6,8 +6,7 @@ node_modules/
 .env
 
 # test
-*_test*
-createTestData.js
+test/
 
 # mac
 .DS_Store
