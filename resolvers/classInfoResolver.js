@@ -111,12 +111,15 @@ const resolvers = {
             try {
                 const classData = await ClassInfo.find(filter)
                 .skip(offset)
-                .limit(PAGELIMIT)
+                .limit(HOME_PAGELIMIT)
                 .exec();
+
+                const allPageNums = await ClassInfo.find(filter).countDocuments();
 
                 return {
                     classList: classData,
-                    response: generateResponseObj(200, "ok")
+                    response: generateResponseObj(200, "ok"),
+                    maxPageNum: Math.ceil(allPageNums / HOME_PAGELIMIT)
                 };
 
             } catch (err) {
@@ -135,17 +138,6 @@ const resolvers = {
                 return {
                     response: generateResponseObj(200, "ok"),
                     classList: newData
-                }
-            } catch (err) {
-                return { response: generateResponseObj(500, "Internal Server Error") }
-            }
-        },
-        getAllPageNums: async (_, args, context) => {
-            try {
-                const allPagnNums = await ClassInfo.find().countDocuments();
-                return {
-                    response: generateResponseObj(200, "ok"),
-                    number: Math.ceil(allPagnNums / HOME_PAGELIMIT)
                 }
             } catch (err) {
                 return { response: generateResponseObj(500, "Internal Server Error") }

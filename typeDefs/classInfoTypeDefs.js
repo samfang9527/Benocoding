@@ -88,6 +88,7 @@ const typeDefs = `#graphql
     type ClassListResponse {
         response: Response
         classList: [Class]
+        maxPageNum: Int
     }
 
     type UserClass {
@@ -147,11 +148,6 @@ const typeDefs = `#graphql
         deletions: Int
         mergeable: String
         diffData: String
-    }
-
-    type NumResponse {
-        response: Response
-        number: Int
     }
 
     type UpdateResponse {
@@ -224,7 +220,6 @@ const typeDefs = `#graphql
         getMessages(chatroomId: String!): MessageResponse
         getClassList(pageNum: Int!, keyword: String): ClassListResponse
         getRandomClasses: ClassListResponse
-        getAllPageNums: NumResponse
         getLearnerClassList(userId: String!, pageNum: Int!): UserClassListResponse
         getCreaterClassList(userId: String!, pageNum: Int!): UserClassListResponse
         getAllPullRequests(userId: String!, classId: String!): GeneralPRResponse
