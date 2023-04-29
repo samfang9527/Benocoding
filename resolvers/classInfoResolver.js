@@ -1,9 +1,10 @@
 
 import { DB, UserClassInfo, ClassInfo, Chatroom, User, Order } from "../models/database.js";
+import { getClassCache, setClassCache, updateClassCache } from "../utils/cache.js";
 import { PAGELIMIT, HOME_PAGELIMIT } from "../constant.js";
-import axios from "axios";
 import escapeStringRegexp from "escape-string-regexp";
 import { jwtValidation } from "../utils/util.js";
+import axios from "axios";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -37,7 +38,16 @@ const resolvers = {
             }
 
             try {
+                const isCached = await getClassCache(classId);
+                if ( isCached !== '' ) {
+                    const info = JSON.parse(isCached);
+                    info.id = info._id;     // Manually add id after JSON.stringify();
+                    info.response = generateResponseObj(200, "ok");
+                    return info;
+                }
+
                 const info = await getClass(classId);
+                await setClassCache(classId, JSON.stringify(info));
                 info.response = generateResponseObj(200, "ok");
                 return info;
             } catch (err) {
@@ -521,14 +531,19 @@ const resolvers = {
 
                 await ClassInfo.updateOne(
                     { _id: classId, ownerId: userData.userId },
-                    { $set: data }
+                    { $set: data },
+                    { new: true }
                 )
 
                 const updateObj = {...data};
                 Object.keys(updateObj).forEach((key) => {
+                    classData[key] = updateObj[key];
                     updateObj[`createdClasses.$.${key}`] = updateObj[key];
                     delete updateObj[key];
                 })
+                classData.id = classData._id.toString();
+                await updateClassCache( classId, JSON.stringify(classData) );
+
                 await User.findOneAndUpdate(
                     { _id: userData.userId, 'createdClasses.classId': classId },
                     { $set: updateObj }

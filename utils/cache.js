@@ -1,7 +1,6 @@
 
 import { Redis } from "ioredis";
 import dotenv from "dotenv";
-import { createAdapter } from "@socket.io/redis-adapter";
 
 dotenv.config();
 
@@ -13,6 +12,13 @@ dotenv.config();
 //     LOCAL_REDIS_PWD
 // } = process.env
 
+// const redisClient = new Redis({
+//     port: LOCAL_REDIS_PORT,
+//     host: LOCAL_REDIS_HOST,
+//     username: LOCAL_REDIS_USER,
+//     password: LOCAL_REDIS_PWD,
+// });
+
 // aws
 const {
     ELASTICACHED_PORT,
@@ -21,28 +27,65 @@ const {
     ELASTICACHED_PWD
 } = process.env
 
-export function initialRedisPubSub(io) {
+const redisClient = new Redis({
+    port: ELASTICACHED_PORT,
+    host: ELASTICACHED_HOST,
+    username: ELASTICACHED_USER,
+    password: ELASTICACHED_PWD,
+    tls: {}
+});
 
-    const redisPub = new Redis({
-        port: ELASTICACHED_PORT,
-        host: ELASTICACHED_HOST,
-        username: ELASTICACHED_USER,
-        password: ELASTICACHED_PWD,
-        tls: {}
-    });
+redisClient.on("ready", () => { console.log('redisClient is ready') });
+redisClient.on("error", (err) => { console.error(err) });
 
-    // const redisPub = new Redis({
-    //     port: LOCAL_REDIS_PORT,
-    //     host: LOCAL_REDIS_HOST,
-    //     username: LOCAL_REDIS_USER,
-    //     password: LOCAL_REDIS_PWD,
-    // });
+export async function getClassCache( classId ) {
+    try {
+        // get cache
+        const classData = await redisClient.hget("classCache", classId);
+        return classData ? classData : '';
+    } catch (err) {
+        console.error(err);
+        throw err;
+    }
+}
 
-    const redisSub = redisPub.duplicate();
-    io.adapter(createAdapter(redisPub, redisSub));
+export async function setClassCache( classId, classData ) {
+    try {
+        const hashData = {};
+        hashData[classId] = classData
+        const result = await redisClient.hset("classCache", hashData)
+        return result;
+    } catch (err) {
+        console.error(err);
+        throw err;
+    }
+}
+
+export async function updateClassCache( classId, classData ) {
+    try {
+        const isCached = await redisClient.hexists("classCache", classId);
+        if ( isCached ) {
+            const hashData = {};
+            hashData[classId] = classData;
+            await redisClient.hset("classCache", hashData);
+        }
+        return;
+    } catch (err) {
+        console.error(err);
+        throw err;
+    }
+}
+
+export function initialRedisPubSub() {
+
+    const redisPub = redisClient.duplicate();
+    const redisSub = redisClient.duplicate();
 
     redisPub.on("ready", () => { console.log('redisPub is ready') });
     redisSub.on("ready", () => { console.log('redisSub is ready') });
+
+    redisPub.on("error", (err) => { console.error(err) });
+    redisSub.on("error", (err) => { console.error(err) });
 
     return {
         redisPub: redisPub,

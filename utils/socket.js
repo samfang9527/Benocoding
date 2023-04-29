@@ -19,7 +19,7 @@ export function createIOServer(httpServer) {
 
 export async function initialSocketIO(io) {
 
-    const { redisPub, redisSub } = initialRedisPubSub(io);
+    const { redisPub, redisSub } = initialRedisPubSub();
     io.adapter(createAdapter(redisPub, redisSub));
 
     redisSub.on("message", (channel, msgData) => {

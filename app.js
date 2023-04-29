@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import { ApolloServer } from "@apollo/server";
 import { expressMiddleware } from "@apollo/server/express4";
 import { ApolloServerPluginDrainHttpServer } from "@apollo/server/plugin/drainHttpServer";
+import { ApolloServerPluginInlineTrace } from "@apollo/server/plugin/inlineTrace";
 import http from "http";
 import cors from "cors";
 import { generateUploadURL } from "./utils/s3.js";
@@ -36,7 +37,7 @@ initialSocketIO(io);
 const server = new ApolloServer({
     typeDefs: [userTypeDefs, classInfoTypeDefs],
     resolvers: [userResolvers, classInfoResolvers],
-    plugins: [ApolloServerPluginDrainHttpServer( { httpServer } )],
+    plugins: [ApolloServerPluginDrainHttpServer( { httpServer } ), ApolloServerPluginInlineTrace()],
 });
 
 await server.start();
