@@ -63,13 +63,13 @@ export async function initialSocketIO(io) {
             console.log(`user: ${socket.id} publish ${msgData}`);
         });
     
-        socket.on('codeReview', async (diffString) => {
+        socket.on('codeReview', async (diffString, number) => {
+            console.log(number);
             // connect to openai
             const apiKey = process.env.CHATGPT_API_KEY;
             const organization = process.env.CHATGPT_ORGANIZATION;
             const intro = `
-                Please review all the following code diff and give me a summary,
-                describe the change and tell me if there are any problems or recommendations that can make it better.
+                Please review all the following code diff and give me a code review within 150 words, give me a formated string which are easy for human to read.
             `;
             const model = process.env.CHATGPT_MODEL;
             const messages = [{
@@ -100,7 +100,7 @@ export async function initialSocketIO(io) {
                     messages: messages
                 })
                 const codeReview = response.data.choices[0].message.content;
-                socket.emit('codeReviewResult', codeReview);
+                socket.emit('codeReviewResult', codeReview, number);
                 console.log(codeReview);
                 console.log('Complete generating code review');
     
