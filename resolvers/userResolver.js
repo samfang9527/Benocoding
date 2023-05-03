@@ -7,23 +7,22 @@ import {
 } from "../models/userModel.js";
 import { jwtValidation } from "../utils/util.js";
 import dotenv from "dotenv";
+import validator from "validator";
 
 dotenv.config();
 
-function validateUsername(username) {
-    return 2 <= username.length <= 16;
-}
-
-function validateEmail(email) {
-    return String(email)
-        .toLowerCase()
-        .match(
-        /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
-        );
-}
-
 function validatePassword(password) {
-    return 8 <= password.length <= 20;
+    if ( !validator.isLength(password, { min: 8, max: 16 } ) ) {
+        return false
+    }
+    return true;
+    // const isValidPwd = validator.isStrongPassword(password, {
+    //     minLowercase: 1,
+    //     minUppercase: 1,
+    //     minNumbers: 1,
+    //     minSymbols: 0,
+    // })
+    // return isValidPwd;
 }
 
 const resolvers = {
@@ -95,7 +94,7 @@ const resolvers = {
                     }
                 }
 
-                if ( !validateEmail(email) || !validatePassword(password) ) {
+                if ( !validator.isEmail(email) || !validatePassword(password) ) {
                     return {
                         statusCode: 400,
                         responseMessage: "Wrong input format"
@@ -149,10 +148,18 @@ const resolvers = {
                     }
                 }
 
-                if ( !validateEmail(email) || !validatePassword(password) ) {
+                if ( !validator.isEmail(email) || !validatePassword(password) || !validator.isLength(username, {min: 2, max: 16}) ) {
                     return {
                         statusCode: 400,
                         responseMessage: "Wrong input format"
+                    }
+                }
+
+                const isEmailExist = await User.find({email: email});
+                if ( isEmailExist.length !== 0 ) {
+                    return {
+                        statusCode: 400,
+                        responseMessage: "Email already exists"
                     }
                 }
 
