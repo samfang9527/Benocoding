@@ -399,12 +399,19 @@ const resolvers = {
                 return { response: generateResponseObj(401, "Authentication failed") }
             }
 
-            // check if already buy this class
             const classInfo = await getClass(classId);
-            const { classMembers } = classInfo;
+            const { classMembers, ownerId } = classInfo;
+            // check if is owner
+            if ( ownerId === userData.userId ) {
+                return {
+                    response: generateResponseObj(400, "You can't buy your own class")
+                }
+            }
+
+            // check if already buy this class
             for ( let i = 0; i < classMembers.length; i++) {
                 if ( classMembers[i].userId === userData.userId ) {
-                    return { response: generateResponseObj(409, "Already bought the class") }
+                    return { response: generateResponseObj(400, "Already bought the class") }
                 }
             }
 
