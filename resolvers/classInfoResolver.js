@@ -43,6 +43,7 @@ const resolvers = {
                     const info = JSON.parse(isCached);
                     info.id = info._id;     // Manually add id after JSON.stringify();
                     info.response = generateResponseObj(200, "ok");
+                    console.log('cache hit!');
                     return info;
                 }
 
@@ -526,7 +527,6 @@ const resolvers = {
                 return { response: generateResponseObj(401, "Authentication failed") }
             }
 
-            console.log(data)
             try {
                 // update class info
                 const classData = await ClassInfo.findById(classId);
@@ -543,6 +543,19 @@ const resolvers = {
                     { $set: data },
                     { new: true }
                 )
+
+                const { milestones } = data;
+                if ( milestones ) {
+                    // update user class info
+                    await UserClassInfo.updateMany(
+                        {classId: classId},
+                        {milestones: milestones}
+                    )
+                }
+
+                // update cache
+                const newClassData = await ClassInfo.findById(classId);
+                await updateClassCache(classId, JSON.stringify(newClassData));
                 
                 return {
                     response: generateResponseObj(200, "updated")
