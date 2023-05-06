@@ -92,7 +92,7 @@ const typeDefs = `#graphql
     }
 
     type UserClass {
-        classId: String
+        _id: String
         classImage: String
         className: String
         classDesc: String

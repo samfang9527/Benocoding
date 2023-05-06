@@ -160,16 +160,34 @@ const resolvers = {
                 return { response: generateResponseObj(400, "Missing required arguments") }
             }
 
+            // calculate page range
+            const offset = pageNum * PAGELIMIT;
+
             try {
-                // calculate page range
-                const offset = pageNum * PAGELIMIT;
                 const responseData = await User.findById(userId);
                 const { boughtClasses } = responseData;
+                
+                const classList = [];
+                for ( let i = 0; i < boughtClasses.length; i++ ) {
+                    const { classId } = boughtClasses[i];
+
+                    // check cache
+                    const cachedData = await getClassCache(classId);
+                    if ( cachedData.length !== 0 ) {
+                        // cache hit
+                        classList.push(JSON.parse(cachedData));
+                        continue;
+                    }
+
+                    // cache miss, get data from DB
+                    const DBData = await ClassInfo.findById(classId);
+                    classList.push(DBData);
+                }
 
                 return {
                     response: generateResponseObj(200, "ok"),
-                    classList: boughtClasses.slice(offset, offset + PAGELIMIT),
-                    maxPageNum: Math.ceil(boughtClasses.length / PAGELIMIT)
+                    classList: classList.slice(offset, offset + PAGELIMIT),
+                    maxPageNum: Math.ceil(classList.length / PAGELIMIT)
                 }
             } catch (err) {
                 return { response: generateResponseObj(500, "Internal Server Error") }
@@ -188,11 +206,28 @@ const resolvers = {
             try {
                 const responseData = await User.findById(userId);
                 const { createdClasses } = responseData;
+
+                const classList = [];
+                for ( let i = 0; i < createdClasses.length; i++ ) {
+                    const { classId } = createdClasses[i];
+
+                    // check cache
+                    const cachedData = await getClassCache(classId);
+                    if ( cachedData.length !== 0 ) {
+                        // cache hit
+                        classList.push(JSON.parse(cachedData));
+                        continue;
+                    }
+
+                    // cache miss, get data from DB
+                    const DBData = await ClassInfo.findById(classId);
+                    classList.push(DBData);
+                }
                 
                 return {
                     response: generateResponseObj(200, "ok"),
-                    classList: createdClasses.slice(offset, offset + PAGELIMIT),
-                    maxPageNum: Math.ceil(createdClasses.length / PAGELIMIT)
+                    classList: classList.slice(offset, offset + PAGELIMIT),
+                    maxPageNum: Math.ceil(classList.length / PAGELIMIT)
                 }
             } catch (err) {
                 return { response: generateResponseObj(500, "Internal Server Error") }
