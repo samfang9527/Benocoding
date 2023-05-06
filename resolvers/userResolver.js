@@ -47,7 +47,11 @@ const resolvers = {
             try {
                 const info = await User.findById(id);
                 return {
-                    ...info,
+                    id: info._id,
+                    username: info.username,
+                    email: info.username,
+                    tags: info.tags,
+                    lastChatroomConnectTime: info.lastChatroomConnectTime,
                     statusCode: 200,
                     responseMessage: "ok"
                 };

@@ -2,7 +2,7 @@
 import { Server } from "socket.io";
 import { DOMAIN, WWWDOMAIN } from "../constant.js";
 import { initialRedisPubSub } from "./cache.js";
-import { Chatroom } from "../models/database.js";
+import { Chatroom, User } from "../models/database.js";
 import { Configuration, OpenAIApi } from "openai";
 import { createAdapter } from "@socket.io/redis-adapter";
 
@@ -62,9 +62,12 @@ export async function initialSocketIO(io) {
             await redisPub.publish(chatroomId, msgData);
             console.log(`user: ${socket.id} publish ${msgData}`);
         });
+
+        socket.on("chatroomConnect", async (userId) => {
+            await User.findByIdAndUpdate(userId, {lastChatroomConnectTime: new Date()})
+        })
     
         socket.on('codeReview', async (diffString, number) => {
-            console.log(number);
             // connect to openai
             const apiKey = process.env.CHATGPT_API_KEY;
             const organization = process.env.CHATGPT_ORGANIZATION;

@@ -17,6 +17,7 @@ const typeDefs = `#graphql
         createdClasses: [ClassInfo]
         boughtClasses: [ClassInfo]
         tags: [String]
+        lastChatroomConnectTime: Date
     }
 
     type Jwt {

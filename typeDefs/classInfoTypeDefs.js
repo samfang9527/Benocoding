@@ -112,9 +112,10 @@ const typeDefs = `#graphql
     }
 
     type Message {
-        time: String
+        time: Date
         from: String
         message: String
+        userId: String
     }
 
     type Messages {

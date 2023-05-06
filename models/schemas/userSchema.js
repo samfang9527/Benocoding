@@ -32,7 +32,8 @@ const userSchema = mongoose.Schema({
         teacherName: String,
         classStartDate: Date
     }],
-    tags: [String]
+    tags: [String],
+    lastChatroomConnectTime: Date
 }, { collection: 'users' } );
 
 export { userSchema };
