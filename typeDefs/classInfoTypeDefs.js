@@ -208,10 +208,11 @@ const typeDefs = `#graphql
     input UpdateData {
         className: String
         classDesc: String
-        classStartDate: Date
-        classEndDate: Date
+        classStartDate: String
+        classEndDate: String
         classImage: String
         classVideo: String
+        milestones: [MilestoneData]
     }
 
     type Query {

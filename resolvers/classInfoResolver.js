@@ -526,7 +526,9 @@ const resolvers = {
                 return { response: generateResponseObj(401, "Authentication failed") }
             }
 
+            console.log(data)
             try {
+                // update class info
                 const classData = await ClassInfo.findById(classId);
                 if ( !classData ) {
                     return { response: generateResponseObj(400, "Wrong classId") }
@@ -541,23 +543,8 @@ const resolvers = {
                     { $set: data },
                     { new: true }
                 )
-
-                const updateObj = {...data};
-                Object.keys(updateObj).forEach((key) => {
-                    classData[key] = updateObj[key];
-                    updateObj[`createdClasses.$.${key}`] = updateObj[key];
-                    delete updateObj[key];
-                })
-                classData.id = classData._id.toString();
-                await updateClassCache( classId, JSON.stringify(classData) );
-
-                await User.findOneAndUpdate(
-                    { _id: userData.userId, 'createdClasses.classId': classId },
-                    { $set: updateObj }
-                )
                 
                 return {
-                    ...data,
                     response: generateResponseObj(200, "updated")
                 }
             } catch (err) {
