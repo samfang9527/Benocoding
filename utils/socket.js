@@ -72,7 +72,8 @@ export async function initialSocketIO(io) {
             const apiKey = process.env.CHATGPT_API_KEY;
             const organization = process.env.CHATGPT_ORGANIZATION;
             const intro = `
-                Please review all the following code diff and give me a code review within 150 words, give me a formated string which are easy for human to read.
+                Please review all the following code diff and give me a code review within 150 words.
+                I want you to provide at lease three problems or parts that can make me better within the difference.
             `;
             const model = process.env.CHATGPT_MODEL;
             const messages = [{
