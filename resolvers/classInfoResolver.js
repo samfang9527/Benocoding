@@ -166,10 +166,11 @@ const resolvers = {
             try {
                 const responseData = await User.findById(userId);
                 const { boughtClasses } = responseData;
+                const pagingClassList = boughtClasses.slice(offset, offset + PAGELIMIT);
                 
                 const classList = [];
-                for ( let i = 0; i < boughtClasses.length; i++ ) {
-                    const { classId } = boughtClasses[i];
+                for ( let i = 0; i < pagingClassList.length; i++ ) {
+                    const { classId } = pagingClassList[i];
 
                     // check cache
                     const cachedData = await getClassCache(classId);
@@ -186,8 +187,8 @@ const resolvers = {
 
                 return {
                     response: generateResponseObj(200, "ok"),
-                    classList: classList.slice(offset, offset + PAGELIMIT),
-                    maxPageNum: Math.ceil(classList.length / PAGELIMIT)
+                    classList: classList,
+                    maxPageNum: Math.ceil(boughtClasses.length / PAGELIMIT)
                 }
             } catch (err) {
                 return { response: generateResponseObj(500, "Internal Server Error") }
@@ -206,10 +207,11 @@ const resolvers = {
             try {
                 const responseData = await User.findById(userId);
                 const { createdClasses } = responseData;
+                const pagingClassList = createdClasses.slice(offset, offset + PAGELIMIT);
 
                 const classList = [];
-                for ( let i = 0; i < createdClasses.length; i++ ) {
-                    const { classId } = createdClasses[i];
+                for ( let i = 0; i < pagingClassList.length; i++ ) {
+                    const { classId } = pagingClassList[i];
 
                     // check cache
                     const cachedData = await getClassCache(classId);
@@ -226,8 +228,8 @@ const resolvers = {
                 
                 return {
                     response: generateResponseObj(200, "ok"),
-                    classList: classList.slice(offset, offset + PAGELIMIT),
-                    maxPageNum: Math.ceil(classList.length / PAGELIMIT)
+                    classList: classList,
+                    maxPageNum: Math.ceil(createdClasses.length / PAGELIMIT)
                 }
             } catch (err) {
                 return { response: generateResponseObj(500, "Internal Server Error") }

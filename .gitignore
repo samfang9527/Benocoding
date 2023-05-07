@@ -5,6 +5,10 @@ node_modules/
 # env
 .env
 
+# autoTest file temp stored directory
+autoTestFiles/*
+!autoTestFiles/.gitkeep
+
 # test
 test/
 
