@@ -182,6 +182,9 @@ const resolvers = {
 
                     // cache miss, get data from DB
                     const DBData = await ClassInfo.findById(classId);
+                    if ( !DBData ) {
+                        continue;
+                    }
                     classList.push(DBData);
                 }
 
@@ -223,6 +226,9 @@ const resolvers = {
 
                     // cache miss, get data from DB
                     const DBData = await ClassInfo.findById(classId);
+                    if ( !DBData ) {
+                        continue;
+                    }
                     classList.push(DBData);
                 }
                 

@@ -28,16 +28,16 @@ export const functionTest = async (req, res) => {
         const testResults = await Promise.all(testCases.map((testCase) => {
             return new Promise((resolve, reject) => {
                 const { inputs, result } = testCase;
-                const parsedResult = JSON.parse(result);
+                // const parsedResult = result;
                 const containerName = uuidv4();
     
                 const command = `
-                sudo docker run \
+                docker run \
                     --rm \
                     --name ${containerName} \
                     -v $(pwd)/${filePath}:/app/${filename} \
-                    -e INPUT1=${inputs[0]} \
-                    -e INPUT2=${inputs[1]} \
+                    -e INPUT1=${JSON.stringify(inputs[0])} \
+                    -e INPUT2=${JSON.stringify(inputs[1])} \
                     node:18-alpine node /app/${filename} ${functionName}`;
                 exec(command, (error, stdout, stderr) => {
                     stdout = stdout.trim();
@@ -45,14 +45,14 @@ export const functionTest = async (req, res) => {
                         reject(error);
                     } else {
                         const resultObj = {
-                            case: JSON.parse(testCase.case),
+                            case: testCase.case,
                             inputs: inputs,
                             passed: false,
                             execResult: stdout,
-                            expectedResult: parsedResult
+                            expectedResult: result
                         }
         
-                        if ( stdout.trim() === parsedResult ) {
+                        if ( stdout === result ) {
                             resultObj.passed = true;
                         }
                         resolve(resultObj);
@@ -76,7 +76,7 @@ export const functionTest = async (req, res) => {
         res.status(200).json({testResults});
 
     } catch (err) {
-        console,log(1);
+        console.log(err);
         return res.status(400).json({err: err});
     } finally {
         // remove file
