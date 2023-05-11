@@ -4,8 +4,14 @@ import dotenv from "dotenv";
 import express from "express";
 import { generateUploadURL } from "./utils/s3.js";
 import { API_DOMAIN, DOMAIN, WWWDOMAIN } from "./constant.js";
-import { initWebSocket } from "./utils/socket.js";
 import { initMongoDB } from "./models/database.js";
+
+// socket.io server
+import { Server } from "socket.io";
+import { initialRedisPubSub } from "./utils/cache.js";
+import { createAdapter } from "@socket.io/redis-adapter";
+import registerChatGPTHandlers from "./services/webSocket/chatgptHandler.js";
+import registerChatroomHandlers from "./services/webSocket/chatroomHandler.js";
 
 // Apollo server
 import { ApolloServer } from "@apollo/server";
@@ -35,7 +41,26 @@ const httpServer = http.createServer(app);
 initMongoDB();
 
 // socket.io
-initWebSocket(httpServer);
+const io = new Server(httpServer, {
+    cors: {
+        origin: [DOMAIN, WWWDOMAIN, "http://localhost:3000"],
+        credentials: true
+    }
+});
+
+const { redisPub, redisSub } = initialRedisPubSub();
+io.adapter(createAdapter(redisPub, redisSub));
+
+redisSub.on("message", (channel, msgData) => {
+    io.to(channel).emit('newMessage', JSON.parse(msgData));
+})
+
+const onSocketIOConnection = (socket) => {
+    registerChatroomHandlers(io, socket, redisPub, redisSub);
+    registerChatGPTHandlers(io, socket);
+}
+
+io.on("connection", onSocketIOConnection);
 
 // Apollo server for GraphQL
 const server = new ApolloServer({
@@ -48,7 +73,7 @@ await new Promise((resolve) => httpServer.listen({ port: port }, resolve));
 console.info(`🚀 Server ready at ${API_DOMAIN}/graphql`);
 
 app.use(cors({
-    origin: [WWWDOMAIN, DOMAIN],
+    origin: [WWWDOMAIN, DOMAIN, "http://localhost:3000"],
     methods: ["GET", "POST"]
 }));
 app.use(express.json());
