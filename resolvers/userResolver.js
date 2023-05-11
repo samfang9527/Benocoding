@@ -88,7 +88,7 @@ const resolvers = {
         }
     },
     Mutation: {
-        signin: async (_, args, context) => {
+        signin: async (_, args) => {
             try {
                 const { email, password } = args.data;
                 if ( !email || !password ) {
@@ -142,7 +142,7 @@ const resolvers = {
                 }
             }
         },
-        signup: async (_, args, context) => {
+        signup: async (_, args) => {
             try {
                 const { username, email, password } = args.data;
                 if ( !username || !email || !password ) {

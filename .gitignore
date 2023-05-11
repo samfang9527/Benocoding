@@ -14,3 +14,6 @@ test/
 
 # mac
 .DS_Store
+
+# eslint
+.eslintrc.json

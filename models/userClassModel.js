@@ -1,9 +1,6 @@
 
 import { User } from "./database.js";
 import { UserClassInfo } from "./database.js";
-import mongoose from "mongoose";
-
-const { ObjectId } = mongoose.Types;
 
 async function getUserClassData(classId, userId) {
     try {

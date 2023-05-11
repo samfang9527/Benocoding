@@ -34,5 +34,6 @@ export async function generateUploadURL(fileExtension) {
         return uploadURL;
     } catch (err) {
         console.error(err);
+        return err;
     }
 }

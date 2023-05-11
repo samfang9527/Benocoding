@@ -25,7 +25,7 @@ const jwtValidation = (token) => {
       email: decoded.email
     }
   } catch (err) {
-    return {};
+    return err;
   }
 }
 

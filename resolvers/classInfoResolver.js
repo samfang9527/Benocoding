@@ -16,7 +16,7 @@ import {
 
 import {
     createClassInfo,
-    getClass
+    getClassInfo
 } from "../models/classModel.js";
 
 import { createChatroom, addUserToChatroom } from "../models/chatroomModel.js";
@@ -31,31 +31,32 @@ function generateResponseObj(statusCode, message) {
 
 const resolvers = {
     Query: {
-        class: async (_, args, context) => {
+        class: async (_, args) => {
             const { classId } = args;
             if ( !classId ) {
                 return { response: generateResponseObj(400, "Missing required arguments") }
             }
 
             try {
-                const isCached = await getClassCache(classId);
-                if ( isCached !== '' ) {
-                    const info = JSON.parse(isCached);
-                    info.id = info._id;     // Manually add id after JSON.stringify();
-                    info.response = generateResponseObj(200, "ok");
-                    console.log('cache hit!');
-                    return info;
+                const cacheData = await getClassCache(classId);
+                if ( cacheData !== '' ) {
+                    const parsedCacheData = JSON.parse(cacheData);
+                    parsedCacheData.id = parsedCacheData._id;     // Manually add id after JSON.stringify();
+                    parsedCacheData.response = generateResponseObj(200, "ok");
+                    console.trace('cache hit!');
+                    return parsedCacheData;
                 }
 
-                const info = await getClass(classId);
-                await setClassCache(classId, JSON.stringify(info));
-                info.response = generateResponseObj(200, "ok");
-                return info;
+                const classInfo = await getClassInfo(classId);
+                await setClassCache(classId, JSON.stringify(classInfo));
+                classInfo.response = generateResponseObj(200, "ok");
+                return classInfo;
+
             } catch (err) {
                 return { response: generateResponseObj(500, "Internal Server Error") }
             }
         },
-        milestones: async (_, args, context) => {
+        milestones: async (_, args) => {
             const { classId, userId } = args;
             if ( !classId || !userId ) {
                 return {
@@ -65,8 +66,8 @@ const resolvers = {
             }
 
             try {
-                const [ info ] = await getUserClassData(classId, userId);
-                if ( !info ) {
+                const [ userClassData ] = await getUserClassData(classId, userId);
+                if ( !userClassData ) {
                     return {
                         response: generateResponseObj(200, "No matched data"),
                         milestones: []
@@ -75,35 +76,35 @@ const resolvers = {
 
                 return {
                     response: generateResponseObj(200, "ok"),
-                    milestones: info.milestones
+                    milestones: userClassData.milestones
                 }
 
             } catch (err) {
                 return { response: generateResponseObj(500, "Internal Server Error") }
             }
         },
-        getMessages: async (_, args, context) => {
+        getMessages: async (_, args) => {
             const { chatroomId } = args;
             if ( !chatroomId ) {
                 return { response: generateResponseObj(400, "Missing required arguments") }
             }
 
             try {
-                const data = await Chatroom.findById(chatroomId);
-                if ( !data ) {
+                const chatroomData = await Chatroom.findById(chatroomId);
+                if ( !chatroomData ) {
                     return { response: generateResponseObj(200, "No matched data") }
                 }
 
                 return {
                     response: generateResponseObj(200, "ok"),
-                    messages: data.messages
+                    messages: chatroomData.messages
                 }
 
             } catch (err) {
                 return { response: generateResponseObj(500, "Internal Server Error") }
             }
         },
-        getClassList: async (_, args, context) => {
+        getClassList: async (_, args) => {
             const { pageNum, keyword } = args;
             if ( pageNum === undefined || pageNum === null ) {
                 return { response: generateResponseObj(400, "Missing required arguments") }
@@ -137,7 +138,7 @@ const resolvers = {
                 return { response: generateResponseObj(500, "Internal Server Error") }
             }
         },
-        getRandomClasses: async (_, args, context) => {
+        getRandomClasses: async () => {
             try {
                 const data = await ClassInfo.aggregate([{$sample: {size: 3}}]);
                 const newData = data.map((ele) => {
@@ -154,7 +155,7 @@ const resolvers = {
                 return { response: generateResponseObj(500, "Internal Server Error") }
             }
         },
-        getLearnerClassList: async (_, args, context) => {
+        getLearnerClassList: async (_, args) => {
             const { userId, pageNum } = args;
             if ( !userId || pageNum === undefined || pageNum === null ) {
                 return { response: generateResponseObj(400, "Missing required arguments") }
@@ -164,8 +165,8 @@ const resolvers = {
             const offset = pageNum * PAGELIMIT;
 
             try {
-                const responseData = await User.findById(userId);
-                const { boughtClasses } = responseData;
+                const userData = await User.findById(userId);
+                const { boughtClasses } = userData;
                 const pagingClassList = boughtClasses.slice(offset, offset + PAGELIMIT);
                 
                 const classList = [];
@@ -177,15 +178,13 @@ const resolvers = {
                     if ( cachedData.length !== 0 ) {
                         // cache hit
                         classList.push(JSON.parse(cachedData));
-                        continue;
+                    } else {
+                        // cache miss, get data from DB
+                        const classData = await ClassInfo.findById(classId);
+                        if ( classData ) {
+                            classList.push(classData);
+                        }
                     }
-
-                    // cache miss, get data from DB
-                    const DBData = await ClassInfo.findById(classId);
-                    if ( !DBData ) {
-                        continue;
-                    }
-                    classList.push(DBData);
                 }
 
                 return {
@@ -198,7 +197,7 @@ const resolvers = {
             }
             
         },
-        getCreaterClassList: async (_, args, context) => {
+        getCreaterClassList: async (_, args) => {
             const { userId, pageNum } = args;
             if ( !userId || pageNum === undefined || pageNum === null ) {
                 return { response: generateResponseObj(400, "Missing required arguments") }
@@ -208,8 +207,8 @@ const resolvers = {
             const offset = pageNum * PAGELIMIT;
 
             try {
-                const responseData = await User.findById(userId);
-                const { createdClasses } = responseData;
+                const userData = await User.findById(userId);
+                const { createdClasses } = userData;
                 const pagingClassList = createdClasses.slice(offset, offset + PAGELIMIT);
 
                 const classList = [];
@@ -221,15 +220,13 @@ const resolvers = {
                     if ( cachedData.length !== 0 ) {
                         // cache hit
                         classList.push(JSON.parse(cachedData));
-                        continue;
+                    } else {
+                        // cache miss, get data from DB
+                        const classData = await ClassInfo.findById(classId);
+                        if ( classData ) {
+                            classList.push(classData);
+                        }
                     }
-
-                    // cache miss, get data from DB
-                    const DBData = await ClassInfo.findById(classId);
-                    if ( !DBData ) {
-                        continue;
-                    }
-                    classList.push(DBData);
                 }
                 
                 return {
@@ -241,15 +238,15 @@ const resolvers = {
                 return { response: generateResponseObj(500, "Internal Server Error") }
             }
         },
-        getAllPullRequests: async (_, args, context) => {
+        getAllPullRequests: async (_, args) => {
             const { userId, classId } = args;
             if ( !userId || !classId ) {
                 return { response: generateResponseObj(400, "Missing required arguments") }
             }
             
             try {
-                const gitHubData = await ClassInfo.findById(classId);
-                const { ownerId, gitHub } = gitHubData;
+                const classData = await ClassInfo.findById(classId);
+                const { ownerId, gitHub } = classData;
                 if ( ownerId === userId ) {
                     
                     const { data } = await axios.get(
@@ -262,7 +259,7 @@ const resolvers = {
                         }
                     )
 
-                    const results = data.map((pr) => {
+                    const gitHubData = data.map((pr) => {
                             return {
                                 number: pr.number,
                                 title: pr.title,
@@ -277,7 +274,7 @@ const resolvers = {
                     )
                     return {
                         response: generateResponseObj(200, "ok"),
-                        data: results
+                        data: gitHubData
                     }
                 }
                 return { response: generateResponseObj(403, "Forbidden") }
@@ -285,18 +282,18 @@ const resolvers = {
                 return { response: generateResponseObj(500, "Internal Server Error") }
             }
         },
-        getPRDetail: async (_, args, context) => {
+        getPRDetail: async (_, args) => {
             const { userId, classId, number } = args;
             if ( !userId || !classId || !number ) {
                 return { response: generateResponseObj(400, "Missing required arguments") }
             }
             
             try {
-                const gitHubData = await ClassInfo.findById(classId);
-                const { ownerId, gitHub } = gitHubData;
+                const classData = await ClassInfo.findById(classId);
+                const { ownerId, gitHub } = classData;
                 if ( ownerId === userId ) {
                     try {
-                        const { data } = await axios.get(
+                        const prInfoPromise = axios.get(
                             `https://api.github.com/repos/${gitHub.owner}/${gitHub.repo}/pulls/${number}`,
                             {
                                 headers: {
@@ -306,7 +303,7 @@ const resolvers = {
                             }
                         )
         
-                        const diffData = await axios.get(
+                        const diffDataPromise = axios.get(
                             `https://api.github.com/repos/${gitHub.owner}/${gitHub.repo}/pulls/${number}.diff?diff_filter=exclude:package-lock.json`,
                             {
                                 headers: {
@@ -315,40 +312,40 @@ const resolvers = {
                                 }
                             }
                         )
-                        
-                        const diffLines = diffData.data.split('\n');
+
+                        const prDataResult = await Promise.all([prInfoPromise, diffDataPromise]);
+                        const prInfo = prDataResult[0].data;
+                        const diffLines = prDataResult[1].data.split('\n');
+
                         // exclude changes on package-lock.json
                         const newDiffLines = [];
-                        let jump = false;
                         for ( let i = 0; i < diffLines.length; i++ ) {
+                            let skip = false;
                             const line = diffLines[i];
-                            if ( line.includes('diff') ) {
-                                if ( line.includes('package-lock.json') ) {
-                                    jump = true;
-                                } else {
-                                    jump = false;
-                                }  
+                            if ( line.includes('diff') && line.includes('package-lock.json') ) {
+                                skip = true;
                             }
-                            if ( !jump ) {
+                            if ( !skip ) {
                                 newDiffLines.push(line);
                             }
                         }
                         
                         return {
                             response: generateResponseObj(200, "ok"),
-                            body: data.body,
-                            html_url: data.html_url,
-                            state: data.state,
-                            merge_commit_sha: data.merge_commit_sha,
-                            commits: data.commits,
-                            additions: data.additions,
-                            deletions: data.deletions,
-                            mergeable: data.mergeable,
+                            body: prInfo.body,
+                            html_url: prInfo.html_url,
+                            state: prInfo.state,
+                            merge_commit_sha: prInfo.merge_commit_sha,
+                            commits: prInfo.commits,
+                            additions: prInfo.additions,
+                            deletions: prInfo.deletions,
+                            mergeable: prInfo.mergeable,
                             diffData: newDiffLines.join('\n')
                         }
 
                     } catch (err) {
                         console.error(err);
+                        return { response: generateResponseObj(500, "Failed on fetching gitHub data") }
                     }
                 }
                 return { response: generateResponseObj(403, "Forbidden") }
@@ -443,7 +440,7 @@ const resolvers = {
                 return { response: generateResponseObj(401, "Authentication failed") }
             }
 
-            const classInfo = await getClass(classId);
+            const classInfo = await getClassInfo(classId);
             const { classMembers, ownerId } = classInfo;
             // check if is owner
             if ( ownerId === userData.userId ) {

@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 
 import { Server } from "socket.io";
 import { DOMAIN, WWWDOMAIN } from "../constant.js";
@@ -6,7 +7,8 @@ import { Chatroom, User } from "../models/database.js";
 import { Configuration, OpenAIApi } from "openai";
 import { createAdapter } from "@socket.io/redis-adapter";
 
-export function createIOServer(httpServer) {
+export async function initWebSocket(httpServer) {
+
     const io = new Server(httpServer, {
         cors: {
             origin: [DOMAIN, WWWDOMAIN, "http://localhost:3000"],
@@ -14,10 +16,6 @@ export function createIOServer(httpServer) {
             credentials: true
         }
     });
-    return io;
-}
-
-export async function initialSocketIO(io) {
 
     const { redisPub, redisSub } = initialRedisPubSub();
     io.adapter(createAdapter(redisPub, redisSub));
@@ -27,18 +25,18 @@ export async function initialSocketIO(io) {
     })
 
     io.on('connection', (socket) => {
-        console.log(`user: ${socket.id} connected`);
+        console.info(`user: ${socket.id} connected`);
 
         socket.on('subscribe', async ( chatroomId ) => {
             // join room
             await socket.join(chatroomId);
-            console.log(`${socket.id} join room: ${chatroomId}`);
+            console.trace(`${socket.id} join room: ${chatroomId}`);
 
             // check if already subscribe chatroom on redis
             const [ isSubscribed ] = await redisPub.pubsub("CHANNELS", chatroomId)
             if ( !isSubscribed ) {
                 await redisSub.subscribe(chatroomId);
-                console.log(`${socket.id} subscribe ${chatroomId}`);
+                console.trace(`${socket.id} subscribe ${chatroomId}`);
             }
         })
 
@@ -49,7 +47,7 @@ export async function initialSocketIO(io) {
             // unsubscribe if no members in room
             if ( !io.sockets.adapter.rooms.has(chatroomId) ) {
                 await redisSub.unsubscribe(chatroomId);
-                console.log(`${socket.id} unsub ${chatroomId}`);
+                console.trace(`${socket.id} unsub ${chatroomId}`);
             }
         });
       
@@ -60,7 +58,7 @@ export async function initialSocketIO(io) {
             })
 
             await redisPub.publish(chatroomId, msgData);
-            console.log(`user: ${socket.id} publish ${msgData}`);
+            console.trace(`user: ${socket.id} publish ${msgData}`);
         });
 
         socket.on("chatroomConnect", async (userId) => {
@@ -98,15 +96,14 @@ export async function initialSocketIO(io) {
                 
                 const openai = new OpenAIApi(configuration);
                 
-                console.log('start generating code review');
+                console.trace('start generating code review');
                 const response = await openai.createChatCompletion({
                     model: model,
                     messages: messages
                 })
                 const codeReview = response.data.choices[0].message.content;
                 socket.emit('codeReviewResult', codeReview, number);
-                console.log(codeReview);
-                console.log('Complete generating code review');
+                console.trace('Complete generating code review');
     
     
             } catch (err) {

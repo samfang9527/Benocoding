@@ -4,12 +4,6 @@ import { v4 as uuidv4 } from 'uuid';
 import axios from "axios";
 import { UserClassInfo } from "../models/database.js";
 import fs from "fs";
-import { log } from "console";
-
-function isUrl(string) {
-    const urlRegex = /^(?:http|https):\/\/[\w\-]+(?:\.[\w\-]+)+[\w\-.,@?^=%&:/~+#]*$/;
-    return urlRegex.test(string);
-}
 
 export const functionTest = async (req, res) => {
 
@@ -28,21 +22,25 @@ export const functionTest = async (req, res) => {
         const testResults = await Promise.all(testCases.map((testCase) => {
             return new Promise((resolve, reject) => {
                 const { inputs, result } = testCase;
-                // const parsedResult = result;
                 const containerName = uuidv4();
-    
+                
+                const timeoutMs = 5000;
                 const command = `
                 docker run \
                     --rm \
                     --name ${containerName} \
+                    --cpus 0.5 \
+                    --memory 64m \
                     -v $(pwd)/${filePath}:/app/${filename} \
                     -e INPUT1=${JSON.stringify(inputs[0])} \
                     -e INPUT2=${JSON.stringify(inputs[1])} \
                     node:18-alpine node /app/${filename} ${functionName}`;
+
                 exec(command, (error, stdout, stderr) => {
                     stdout = stdout.trim();
-                    if ( error ) {
-                        reject(error);
+                    stderr = stderr.trim();
+                    if ( error || stderr ) {
+                        reject(error || stderr);
                     } else {
                         const resultObj = {
                             case: testCase.case,
@@ -58,17 +56,27 @@ export const functionTest = async (req, res) => {
                         resolve(resultObj);
                     }
                 })
+                setTimeout(() => {
+                    const stopCommand = `
+                    docker stop -t 1 ${containerName}
+                    `
+                    exec(stopCommand, (error) => {
+                        if ( error ) reject(error);
+                    });
+                    reject(new Error('Execution time exceed limit'));
+                }, timeoutMs);
             })
         }));
 
-        console.log(testResults);
+        // check all case results
         for ( let i = 0; i < testResults.length; i++ ) {
             if ( !testResults[i].passed ) {
                 return res.status(200).json({testResults});
             }
         }
+
         // update milestone passed to true
-        const result = await UserClassInfo.updateOne(
+        await UserClassInfo.updateOne(
             { classId: classId, userId: userId },
             { $set: { [`milestones.${milestoneIdx}.passed`]: true } },
             { new: true }
@@ -76,8 +84,8 @@ export const functionTest = async (req, res) => {
         res.status(200).json({testResults});
 
     } catch (err) {
-        console.log(err);
-        return res.status(400).json({err: err});
+        console.error(err);
+        return res.status(400).json({err: err.message});
     } finally {
         // remove file
         fs.unlink(filePath, (err) => {
@@ -85,57 +93,62 @@ export const functionTest = async (req, res) => {
                 console.error(err)
                 return;
             }
-            console.log('file removed');
+            console.trace('file removed');
         })
     }
 }
 
 export const apiTest = async (req, res) => {
-    const { targetUrl, testCases } = req.body;
+    const { targetUrl, testCases, classId, userId, milestoneIdx } = req.body;
     const parsedTestCases = JSON.parse(testCases);
+    console.log(classId, userId, milestoneIdx)
 
-    console.log(targetUrl, parsedTestCases);
-
-    if ( !isUrl(targetUrl) ) {
-        console.log('invalid');
-        return res.status(400).json({ message: "Not valid url" });
-    }
-
-    const testResults = await Promise.all(parsedTestCases.map((testCase) => {
-        return new Promise( async (resolve, reject) => {
-            try {
-                const response = await axios({
-                    method: `${JSON.parse(testCase.method)}`,
-                    url: targetUrl,
-                    headers: {
-                        "Content-Type": "application/json"
-                    }
-                })
-                
-                const { status, data } = response;
-                const resultObj = {
-                    case: JSON.parse(testCase.case),
-                    url: targetUrl,
-                    passed: true,
-                    execStatus: status,
-                    expectedStatus: JSON.parse(testCase.statusCode),
-                    execData: data,
-                    expectedData: JSON.parse(testCase.result)
-                }
-                if ( String(status) !== JSON.parse(testCase.statusCode) || data !== JSON.parse(testCase.result) ) {
-                    resultObj.passed = false;
-                }
-                resolve(resultObj);   
-                
-            } catch (err) {
-                reject({
-                    passed: false,
-                    message: err
-                })
+    const axiosPromises = parsedTestCases.map((testCase) => {
+        return axios({
+            method: testCase.method,
+            url: targetUrl,
+            headers: {
+                "Content-Type": "application/json"
             }
         })
-    }));
-    console.log(testResults);
-    res.status(200).json(testResults);
+    });
+
+    try {
+        const testResults = await Promise.all(axiosPromises);
+        let allPassed = true;
+        for ( let i = 0; i < testResults.length; i++ ) {
+            const testResult = testResults[i];
+            const resultObj = {
+                case: parsedTestCases[i].case,
+                url: targetUrl,
+                passed: true,
+                execStatus: testResult.status,
+                expectedStatus: parsedTestCases[i].statusCode,
+                execData: testResult.data,
+                expectedData: parsedTestCases[i].result
+            }
+
+            if ( String(testResult.status) !== parsedTestCases[i].statusCode || testResult.data !== parsedTestCases[i].result ) {
+                resultObj.passed = false;
+                allPassed = false;
+            }
+            testResults[i] = resultObj;
+        }
+
+        // update milestone passed to true
+        if ( allPassed ) {
+            await UserClassInfo.updateOne(
+                { classId: classId, userId: userId },
+                { $set: { [`milestones.${milestoneIdx}.passed`]: true } },
+                { new: true }
+            );
+        }
+
+        return res.status(200).json({testResults});
+        
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({err});
+    }
 }
 

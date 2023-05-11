@@ -35,7 +35,7 @@ const redisClient = new Redis({
     tls: {}
 });
 
-redisClient.on("ready", () => { console.log('redisClient is ready') });
+redisClient.on("ready", () => { console.info('redisClient is ready') });
 redisClient.on("error", (err) => { console.error(err) });
 
 export async function getClassCache( classId ) {
@@ -45,7 +45,7 @@ export async function getClassCache( classId ) {
         return classData ? classData : '';
     } catch (err) {
         console.error(err);
-        throw err;
+        return err;
     }
 }
 
@@ -54,11 +54,11 @@ export async function setClassCache( classId, classData ) {
         const hashData = {};
         hashData[classId] = classData
         const result = await redisClient.hset("classCache", hashData)
-        console.log('cache set!');
+        console.trace('cache set!');
         return result;
     } catch (err) {
         console.error(err);
-        throw err;
+        return err;
     }
 }
 
@@ -69,12 +69,12 @@ export async function updateClassCache( classId, classData ) {
             const hashData = {};
             hashData[classId] = classData;
             await redisClient.hset("classCache", hashData);
-            console.log('cache updated!');
+            console.trace('cache updated!');
         }
         return;
     } catch (err) {
         console.error(err);
-        throw err;
+        return err;
     }
 }
 
@@ -83,8 +83,8 @@ export function initialRedisPubSub() {
     const redisPub = redisClient.duplicate();
     const redisSub = redisClient.duplicate();
 
-    redisPub.on("ready", () => { console.log('redisPub is ready') });
-    redisSub.on("ready", () => { console.log('redisSub is ready') });
+    redisPub.on("ready", () => { console.info('redisPub is ready') });
+    redisSub.on("ready", () => { console.info('redisSub is ready') });
 
     redisPub.on("error", (err) => { console.error(err) });
     redisSub.on("error", (err) => { console.error(err) });
