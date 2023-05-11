@@ -40,7 +40,6 @@ redisClient.on("error", (err) => { console.error(err) });
 
 export async function getClassCache( classId ) {
     try {
-        // get cache
         const classData = await redisClient.hget("classCache", classId);
         return classData ? classData : '';
     } catch (err) {

@@ -1,4 +1,3 @@
-/* eslint-disable no-undef */
 import http from "http";
 import cors from "cors";
 import dotenv from "dotenv";
@@ -12,7 +11,6 @@ import { initMongoDB } from "./models/database.js";
 import { ApolloServer } from "@apollo/server";
 import { expressMiddleware } from "@apollo/server/express4";
 import { ApolloServerPluginDrainHttpServer } from "@apollo/server/plugin/drainHttpServer";
-import { ApolloServerPluginInlineTrace } from "@apollo/server/plugin/inlineTrace";
 
 // typeDefs
 import { typeDefs as userTypeDefs } from "./typeDefs/userTypeDefs.js";
@@ -43,23 +41,18 @@ initWebSocket(httpServer);
 const server = new ApolloServer({
     typeDefs: [userTypeDefs, classInfoTypeDefs],
     resolvers: [userResolvers, classInfoResolvers],
-    plugins: [ApolloServerPluginDrainHttpServer( { httpServer } ), ApolloServerPluginInlineTrace()],
+    plugins: [ApolloServerPluginDrainHttpServer( { httpServer } )]
 });
 await server.start();
 await new Promise((resolve) => httpServer.listen({ port: port }, resolve));
 console.info(`🚀 Server ready at ${API_DOMAIN}/graphql`);
 
 app.use(cors({
-    origin: [WWWDOMAIN, DOMAIN, "http://localhost:3000"],
-    methods: ["POST"]
+    origin: [WWWDOMAIN, DOMAIN],
+    methods: ["GET", "POST"]
 }));
 app.use(express.json());
-app.use(express.static('public'));
 app.use('/api/1.0', autoTestRouter, gitHubRouter);
-
-app.use('/test', (req, res) => {
-    res.send("ok");
-})
 
 app.use(
     '/graphql',
