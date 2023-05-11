@@ -78,6 +78,6 @@ app.post('/fileUpload', async (req, res) => {
 })
 
 app.use((req, res) => {
-    console.trace(`404: ${req.path}`);
+    console.log(`404: ${req.path}`);
     res.status(404).json('page not found');
 })

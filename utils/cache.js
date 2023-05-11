@@ -54,7 +54,6 @@ export async function setClassCache( classId, classData ) {
         const hashData = {};
         hashData[classId] = classData
         const result = await redisClient.hset("classCache", hashData)
-        console.trace('cache set!');
         return result;
     } catch (err) {
         console.error(err);
@@ -69,7 +68,6 @@ export async function updateClassCache( classId, classData ) {
             const hashData = {};
             hashData[classId] = classData;
             await redisClient.hset("classCache", hashData);
-            console.trace('cache updated!');
         }
         return;
     } catch (err) {

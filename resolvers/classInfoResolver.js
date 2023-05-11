@@ -1,26 +1,17 @@
 
+import axios from "axios";
+import dotenv from "dotenv";
 import { DB, UserClassInfo, ClassInfo, Chatroom, User, Order } from "../models/database.js";
 import { getClassCache, setClassCache, updateClassCache } from "../utils/cache.js";
 import { PAGELIMIT, HOME_PAGELIMIT } from "../constant.js";
 import escapeStringRegexp from "escape-string-regexp";
 import { jwtValidation } from "../utils/util.js";
-import axios from "axios";
-import dotenv from "dotenv";
-
-dotenv.config();
-
-import {
-    addCreatedClass,
-    addboughtClass
-} from "../models/userModel.js";
-
-import {
-    createClassInfo,
-    getClassInfo
-} from "../models/classModel.js";
-
+import { addCreatedClass, addboughtClass } from "../models/userModel.js";
+import { createClassInfo, getClassInfo} from "../models/classModel.js";
 import { createChatroom, addUserToChatroom } from "../models/chatroomModel.js";
 import { getUserClassData } from "../models/userClassModel.js";
+
+dotenv.config();
 
 function generateResponseObj(statusCode, message) {
     return {
@@ -43,7 +34,6 @@ const resolvers = {
                     const parsedCacheData = JSON.parse(cacheData);
                     parsedCacheData.id = parsedCacheData._id;     // Manually add id after JSON.stringify();
                     parsedCacheData.response = generateResponseObj(200, "ok");
-                    console.trace('cache hit!');
                     return parsedCacheData;
                 }
 
@@ -513,12 +503,11 @@ const resolvers = {
                 await Order.findByIdAndUpdate(orderResult._id, { orderStatus: "paid" })
 
                 // create userClass data
-                const userClassResult = await UserClassInfo.create({
+                await UserClassInfo.create({
                     userId: userData.userId,
                     classId: classInfo._id,
                     milestones: classInfo.milestones
                 })
-                console.log('userClassResult', userClassResult);
 
                 // Update user class
                 const classData = {
@@ -529,12 +518,10 @@ const resolvers = {
                     classStartDate: classInfo.classStartDate,
                     teacherName: classInfo.teacherName
                 }
-                const userUpdatedResult = await addboughtClass(userData.userId, classData, classInfo.classTags);
-                console.log('userUpdatedResult', userUpdatedResult);
+                await addboughtClass(userData.userId, classData, classInfo.classTags);
 
                 // update chatroom
-                const chatroomResult = await addUserToChatroom(classInfo.chatroomId, userData);
-                console.log('chatroomResult', chatroomResult);
+                await addUserToChatroom(classInfo.chatroomId, userData);
 
                 // update class student number
                 await ClassInfo.findByIdAndUpdate(classId, {
