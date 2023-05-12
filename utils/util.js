@@ -29,8 +29,16 @@ const jwtValidation = (token) => {
   }
 }
 
+function generateResponseObj(statusCode, message) {
+  return {
+      statusCode,
+      responseMessage: message
+  }
+}
+
 export {
     wrapAsync,
     getFileExtension,
-    jwtValidation
+    jwtValidation,
+    generateResponseObj
 }

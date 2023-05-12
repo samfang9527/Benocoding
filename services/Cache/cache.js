@@ -4,24 +4,31 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-const {
-    ELASTICACHED_PORT,
-    ELASTICACHED_HOST,
-    ELASTICACHED_USER,
-    ELASTICACHED_PWD
-} = process.env
+// const {
+//     ELASTICACHED_PORT,
+//     ELASTICACHED_HOST,
+//     ELASTICACHED_USER,
+//     ELASTICACHED_PWD
+// } = process.env
 
 let redisClient;
 
 function initCacheService() {
     if ( redisClient ) return redisClient;
+    // redisClient = new Redis({
+    //     port: ELASTICACHED_PORT,
+    //     host: ELASTICACHED_HOST,
+    //     username: ELASTICACHED_USER,
+    //     password: ELASTICACHED_PWD,
+    //     tls: {}
+    // });
+
     redisClient = new Redis({
-        port: ELASTICACHED_PORT,
-        host: ELASTICACHED_HOST,
-        username: ELASTICACHED_USER,
-        password: ELASTICACHED_PWD,
-        tls: {}
-    });
+        port: process.env.LOCAL_REDIS_PORT,
+        host: process.env.LOCAL_REDIS_HOST,
+        username: process.env.LOCAL_REDIS_USER,
+        password: process.env.LOCAL_REDIS_PWD
+    })
     
     redisClient.on("ready", () => { console.info('redisClient is ready') });
     redisClient.on("error", (err) => { console.error(err) });

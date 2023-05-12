@@ -5,20 +5,9 @@ import { DB, UserClassInfo, ClassInfo, Chatroom, User, Order } from "../models/d
 import { getClassCache, setClassCache, updateClassCache } from "../services/Cache/cache.js";
 import { PAGELIMIT, HOME_PAGELIMIT } from "../constant.js";
 import escapeStringRegexp from "escape-string-regexp";
-import { jwtValidation } from "../utils/util.js";
-import { addCreatedClass, addboughtClass } from "../models/userModel.js";
-import { createClassInfo, getClassInfo} from "../models/classModel.js";
-import { createChatroom, addUserToChatroom } from "../models/chatroomModel.js";
-import { getUserClassData } from "../models/userClassModel.js";
+import { jwtValidation, generateResponseObj } from "../utils/util.js";
 
 dotenv.config();
-
-function generateResponseObj(statusCode, message) {
-    return {
-        statusCode,
-        responseMessage: message
-    }
-}
 
 const resolvers = {
     Query: {
@@ -37,7 +26,7 @@ const resolvers = {
                     return parsedCacheData;
                 }
 
-                const classInfo = await getClassInfo(classId);
+                const classInfo = await ClassInfo.findById(classId);
                 await setClassCache(classId, JSON.stringify(classInfo));
                 classInfo.response = generateResponseObj(200, "ok");
                 return classInfo;
@@ -56,7 +45,11 @@ const resolvers = {
             }
 
             try {
-                const [ userClassData ] = await getUserClassData(classId, userId);
+                const [ userClassData ] = await UserClassInfo.find({
+                    classId: classId,
+                    userId: userId
+                });
+
                 if ( !userClassData ) {
                     return {
                         response: generateResponseObj(200, "No matched data"),
@@ -308,18 +301,8 @@ const resolvers = {
                         const diffLines = prDataResult[1].data.split('\n');
 
                         // exclude changes on package-lock.json
-                        const newDiffLines = [];
-                        for ( let i = 0; i < diffLines.length; i++ ) {
-                            let skip = false;
-                            const line = diffLines[i];
-                            if ( line.includes('diff') && line.includes('package-lock.json') ) {
-                                skip = true;
-                            }
-                            if ( !skip ) {
-                                newDiffLines.push(line);
-                            }
-                        }
-                        
+                        const newDiffLines = diffLines.filter(line => !line.includes('diff') || !line.includes('package-lock.json'));
+                         
                         return {
                             response: generateResponseObj(200, "ok"),
                             body: prInfo.body,
@@ -352,8 +335,8 @@ const resolvers = {
                 return { response: generateResponseObj(400, "Missing required arguments") }
             }
 
-            const teacherOptions = ["class info", "members", "chatroom", "pull request", "settings"];
-            const studentOptions = ["class info", "members", "chatroom", "milestones"];
+            const teacherOptions = ["class info", "chatroom", "pull request", "settings"];
+            const studentOptions = ["class info", "chatroom", "milestones"];
             const studentNumbers = 0;
             const status = false;
 
@@ -378,18 +361,18 @@ const resolvers = {
             session.startTransaction()
             try {
                 // create chatroom
-                const chatroomResult = await createChatroom({
+                const chatroomResult = await Chatroom.create({
                     messages: [],
                     ownerId: newData.ownerId,
                     members: [userData]
                 })
 
                 // create general class info
-                const classResult = await createClassInfo({
+                const classResult = await ClassInfo.create({
                     ...newData,
                     chatroomId: chatroomResult._id,
                     classMembers: [userData]
-                });
+                })
 
                 // update user info
                 const classData = {
@@ -400,7 +383,11 @@ const resolvers = {
                     classStartDate: newData.classStartDate,
                     teacherName: newData.teacherName
                 }
-                await addCreatedClass(newData.ownerId, classData, newData.classTags);
+
+                await User.findByIdAndUpdate(newData.ownerId, {
+                    $push: {"createdClasses": classData},
+                    $addToSet: {"tags": { $each: newData.classTags }}
+                })
 
                 await session.commitTransaction();
 
@@ -430,7 +417,7 @@ const resolvers = {
                 return { response: generateResponseObj(401, "Authentication failed") }
             }
 
-            const classInfo = await getClassInfo(classId);
+            const classInfo = await ClassInfo.findById(classId);
             const { classMembers, ownerId } = classInfo;
             // check if is owner
             if ( ownerId === userData.userId ) {
@@ -518,10 +505,14 @@ const resolvers = {
                     classStartDate: classInfo.classStartDate,
                     teacherName: classInfo.teacherName
                 }
-                await addboughtClass(userData.userId, classData, classInfo.classTags);
+
+                await User.findByIdAndUpdate(userData.userId, {
+                    $push: {"boughtClasses": classData},
+                    $addToSet: {"tags": { $each: classInfo.classTags }}
+                })
 
                 // update chatroom
-                await addUserToChatroom(classInfo.chatroomId, userData);
+                await Chatroom.findByIdAndUpdate(classInfo.chatroomId, { $push: {"members": userData} }, {new: true})
 
                 // update class student number
                 await ClassInfo.findByIdAndUpdate(classId, {
