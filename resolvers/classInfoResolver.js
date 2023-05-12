@@ -9,6 +9,18 @@ import { jwtValidation, generateResponseObj } from "../utils/util.js";
 
 dotenv.config();
 
+async function getClassData(classId) {
+    // check cache
+    const cachedData = await getClassCache(classId);
+    if ( cachedData.length !== 0 ) {
+        // cache hit
+        return JSON.parse(cachedData);
+    } else {
+        // cache miss, get data from DB
+        return await ClassInfo.findById(classId);
+    }
+}
+
 const resolvers = {
     Query: {
         class: async (_, args) => {
@@ -152,23 +164,7 @@ const resolvers = {
                 const { boughtClasses } = userData;
                 const pagingClassList = boughtClasses.slice(offset, offset + PAGELIMIT);
                 
-                const classList = [];
-                for ( let i = 0; i < pagingClassList.length; i++ ) {
-                    const { classId } = pagingClassList[i];
-
-                    // check cache
-                    const cachedData = await getClassCache(classId);
-                    if ( cachedData.length !== 0 ) {
-                        // cache hit
-                        classList.push(JSON.parse(cachedData));
-                    } else {
-                        // cache miss, get data from DB
-                        const classData = await ClassInfo.findById(classId);
-                        if ( classData ) {
-                            classList.push(classData);
-                        }
-                    }
-                }
+                const classList = await Promise.all(pagingClassList.map( data => getClassData(data.classId) ))
 
                 return {
                     response: generateResponseObj(200, "ok"),
@@ -194,23 +190,7 @@ const resolvers = {
                 const { createdClasses } = userData;
                 const pagingClassList = createdClasses.slice(offset, offset + PAGELIMIT);
 
-                const classList = [];
-                for ( let i = 0; i < pagingClassList.length; i++ ) {
-                    const { classId } = pagingClassList[i];
-
-                    // check cache
-                    const cachedData = await getClassCache(classId);
-                    if ( cachedData.length !== 0 ) {
-                        // cache hit
-                        classList.push(JSON.parse(cachedData));
-                    } else {
-                        // cache miss, get data from DB
-                        const classData = await ClassInfo.findById(classId);
-                        if ( classData ) {
-                            classList.push(classData);
-                        }
-                    }
-                }
+                const classList = await Promise.all(pagingClassList.map( data => getClassData(data.classId) ))
                 
                 return {
                     response: generateResponseObj(200, "ok"),
