@@ -4,22 +4,6 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-// local test
-// const {
-//     LOCAL_REDIS_PORT,
-//     LOCAL_REDIS_HOST,
-//     LOCAL_REDIS_USER,
-//     LOCAL_REDIS_PWD
-// } = process.env
-
-// const redisClient = new Redis({
-//     port: LOCAL_REDIS_PORT,
-//     host: LOCAL_REDIS_HOST,
-//     username: LOCAL_REDIS_USER,
-//     password: LOCAL_REDIS_PWD,
-// });
-
-// aws
 const {
     ELASTICACHED_PORT,
     ELASTICACHED_HOST,
@@ -27,18 +11,23 @@ const {
     ELASTICACHED_PWD
 } = process.env
 
-const redisClient = new Redis({
-    port: ELASTICACHED_PORT,
-    host: ELASTICACHED_HOST,
-    username: ELASTICACHED_USER,
-    password: ELASTICACHED_PWD,
-    tls: {}
-});
+let redisClient;
 
-redisClient.on("ready", () => { console.info('redisClient is ready') });
-redisClient.on("error", (err) => { console.error(err) });
+function initCacheService() {
+    if ( redisClient ) return redisClient;
+    redisClient = new Redis({
+        port: ELASTICACHED_PORT,
+        host: ELASTICACHED_HOST,
+        username: ELASTICACHED_USER,
+        password: ELASTICACHED_PWD,
+        tls: {}
+    });
+    
+    redisClient.on("ready", () => { console.info('redisClient is ready') });
+    redisClient.on("error", (err) => { console.error(err) });
+}
 
-export async function getClassCache( classId ) {
+async function getClassCache( classId ) {
     try {
         const classData = await redisClient.hget("classCache", classId);
         return classData ? classData : '';
@@ -48,7 +37,7 @@ export async function getClassCache( classId ) {
     }
 }
 
-export async function setClassCache( classId, classData ) {
+async function setClassCache( classId, classData ) {
     try {
         const hashData = {};
         hashData[classId] = classData
@@ -60,7 +49,7 @@ export async function setClassCache( classId, classData ) {
     }
 }
 
-export async function updateClassCache( classId, classData ) {
+async function updateClassCache( classId, classData ) {
     try {
         const isCached = await redisClient.hexists("classCache", classId);
         if ( isCached ) {
@@ -75,7 +64,7 @@ export async function updateClassCache( classId, classData ) {
     }
 }
 
-export function initialRedisPubSub() {
+function initialRedisPubSub() {
 
     const redisPub = redisClient.duplicate();
     const redisSub = redisClient.duplicate();
@@ -90,4 +79,12 @@ export function initialRedisPubSub() {
         redisPub: redisPub,
         redisSub: redisSub
     }
+}
+
+export {
+    initCacheService,
+    initialRedisPubSub,
+    getClassCache,
+    setClassCache,
+    updateClassCache
 }
