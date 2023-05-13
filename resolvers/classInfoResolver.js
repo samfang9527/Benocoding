@@ -2,7 +2,7 @@
 import axios from "axios";
 import dotenv from "dotenv";
 import { DB, UserClassInfo, ClassInfo, Chatroom, User, Order } from "../models/database.js";
-import { getClassCache, setClassCache, updateClassCache } from "../services/Cache/cache.js";
+import { getClassCache, setClassCache, updateClassCache } from "../services/cache/cache.js";
 import { PAGELIMIT, HOME_PAGELIMIT } from "../constant.js";
 import escapeStringRegexp from "escape-string-regexp";
 import { jwtValidation, generateResponseObj } from "../utils/util.js";

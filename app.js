@@ -5,14 +5,14 @@ import express from "express";
 import { generateUploadURL } from "./utils/s3.js";
 import { API_DOMAIN, DOMAIN, WWWDOMAIN } from "./constant.js";
 import { initMongoDB } from "./models/database.js";
-import { initCacheService } from "./services/Cache/cache.js";
+import { initCacheService } from "./services/cache/cache.js";
 
 // socket.io server
 import { Server } from "socket.io";
-import { initialRedisPubSub } from "./services/Cache/cache.js";
+import { initialRedisPubSub } from "./services/cache/cache.js";
 import { createAdapter } from "@socket.io/redis-adapter";
-import registerChatGPTHandlers from "./services/WebSocket/chatgptHandler.js";
-import registerChatroomHandlers from "./services/WebSocket/chatroomHandler.js";
+import registerChatGPTHandlers from "./services/webSocket/chatgptHandler.js";
+import registerChatroomHandlers from "./services/webSocket/chatroomHandler.js";
 
 // Apollo server
 import { ApolloServer } from "@apollo/server";

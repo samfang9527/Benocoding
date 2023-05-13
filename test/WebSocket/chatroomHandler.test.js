@@ -1,6 +1,6 @@
 
 import { Chatroom, User } from "../../models/database";
-import registerChatroomHandlers from "../../services/WebSocket/chatroomHandler";
+import registerChatroomHandlers from "../../services/webSocket/chatroomHandler";
 
 const mockedRedisPub = {
     pubsub: jest.fn().mockResolvedValue([true]),
