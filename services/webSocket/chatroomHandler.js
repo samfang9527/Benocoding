@@ -6,7 +6,7 @@ const registerChatroomHandlers = (io, socket, redisPub, redisSub) => {
     const subscribeChannel = async (chatroomId) => {
         try {
              // join room
-            await socket.join(chatroomId);
+            socket.join(chatroomId);
 
             // check if already subscribe chatroom on redis
             const [ isSubscribed ] = await redisPub.pubsub("CHANNELS", chatroomId)
