@@ -9,8 +9,9 @@ node_modules/
 autoTestFiles/*
 !autoTestFiles/.gitkeep
 
-# fake data for test
+# test
 test/createFakeData
+coverage/
 
 # mac
 .DS_Store

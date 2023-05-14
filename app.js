@@ -47,7 +47,7 @@ initCacheService();
 // socket.io
 const io = new Server(httpServer, {
     cors: {
-        origin: [DOMAIN, WWWDOMAIN, "http://localhost:3000"],
+        origin: [DOMAIN, WWWDOMAIN],
         credentials: true
     }
 });
@@ -77,7 +77,7 @@ await new Promise((resolve) => httpServer.listen({ port: port }, resolve));
 console.info(`🚀 Server ready at ${API_DOMAIN}/graphql`);
 
 app.use(cors({
-    origin: [WWWDOMAIN, DOMAIN, "http://localhost:3000"],
+    origin: [WWWDOMAIN, DOMAIN],
     methods: ["GET", "POST"]
 }));
 app.use(express.json());
