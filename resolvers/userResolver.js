@@ -12,14 +12,14 @@ function validatePassword(password) {
     if ( !validator.isLength(password, { min: 8, max: 16 } ) ) {
         return false
     }
-    return true;
-    // const isValidPwd = validator.isStrongPassword(password, {
-    //     minLowercase: 1,
-    //     minUppercase: 1,
-    //     minNumbers: 1,
-    //     minSymbols: 0,
-    // })
-    // return isValidPwd;
+    
+    const isValidPwd = validator.isStrongPassword(password, {
+        minLowercase: 1,
+        minUppercase: 1,
+        minNumbers: 1,
+        minSymbols: 0,
+    })
+    return isValidPwd;
 }
 
 const resolvers = {

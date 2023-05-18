@@ -1,0 +1,25 @@
+
+on:
+  push:
+    branches: [ release ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the files
+        uses: actions/checkout@v3
+        
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{secrets.EC2_HOST}}
+          username: ${{secrets.EC2_USER}}
+          key: ${{secrets.EC2_SSH_KEY}}
+          port: ${{secrets.EC2_PORT}}
+          script: |
+            cd /home/ec2-user/Benocoding &&
+            git checkout release &&
+            git pull origin release &&
+            npm i &&
+            pm2 restart 0

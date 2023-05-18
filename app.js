@@ -97,14 +97,21 @@ app.post('/fileUpload', async (req, res) => {
     const { fileExtension} = req.body;
     const url = await generateUploadURL(fileExtension);
     return res.status(200).json(url);
-})
+});
+
+// for api test demo
+app.get('/test/api', async (req, res) => {
+    return res.status(200).json({
+        message: "Success! Thank you for using Benocoding"
+    });
+});
 
 // for ALB healthy check 
 app.get('/', (req, res) => {
     res.status(200).send("ok");
-})
+});
 
 app.use((req, res) => {
     console.log(`404: ${req.path}`);
     res.status(404).json('page not found');
-})
+});
