@@ -1,0 +1,24 @@
+
+on:
+  push:
+    branches: [ release ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the files
+        uses: actions/checkout@v3
+        
+      - name: Deploy to EC2
+        env:
+          SSH_PRIVATE_KEY: ${{secrets.EC2_SSH_KEY}}
+          REMOTE_HOST: ${{secrets.EC2_HOST}}
+          REMOTE_USER: ${{secrets.EC2_USER}}
+        run: |
+          ssh -i SSH_PARIVATE_KEY ${REMOTE_USER}@${REMOTE_HOST}
+            cd /home/ec2-user/Benocoding &&
+            git checkout release &&
+            git pull origin release &&
+            npm i &&
+            pm2 restart 0
