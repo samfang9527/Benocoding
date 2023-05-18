@@ -122,9 +122,9 @@ export const apiTest = async (req, res) => {
                 case: parsedTestCases[i].case,
                 url: targetUrl,
                 passed: true,
-                execStatus: testResult.status,
+                execStatus: JSON.stringify(testResult.status),
                 expectedStatus: parsedTestCases[i].statusCode,
-                execData: testResult.data,
+                execData: JSON.stringify(testResult.data),
                 expectedData: parsedTestCases[i].result
             }
 
