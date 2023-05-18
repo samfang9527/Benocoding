@@ -128,7 +128,7 @@ export const apiTest = async (req, res) => {
                 expectedData: parsedTestCases[i].result
             }
 
-            if ( String(testResult.status) !== parsedTestCases[i].statusCode || testResult.data !== parsedTestCases[i].result ) {
+            if ( JSON.stringify(testResult.status) !== parsedTestCases[i].statusCode || JSON.stringify(testResult.data) !== parsedTestCases[i].result ) {
                 resultObj.passed = false;
                 allPassed = false;
             }
