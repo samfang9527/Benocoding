@@ -106,8 +106,6 @@ app.get('/test/api', async (req, res) => {
     });
 });
 
-// test
-
 // for ALB healthy check 
 app.get('/', (req, res) => {
     res.status(200).send("ok");
