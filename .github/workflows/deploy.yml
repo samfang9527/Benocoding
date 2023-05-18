@@ -16,7 +16,7 @@ jobs:
           REMOTE_HOST: ${{secrets.EC2_HOST}}
           REMOTE_USER: ${{secrets.EC2_USER}}
         run: |
-          ssh -i SSH_PARIVATE_KEY ${REMOTE_USER}@${REMOTE_HOST}
+          ssh -i SSH_PRIVATE_KEY ${REMOTE_USER}@${REMOTE_HOST}
             cd /home/ec2-user/Benocoding &&
             git checkout release &&
             git pull origin release &&
