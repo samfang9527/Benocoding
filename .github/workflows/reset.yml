@@ -28,3 +28,10 @@ jobs:
 
       - name: Run JavaScript file
         run: node demo/resetUser.js
+        env:
+          MONGODB_USER: ${{secrets.MONGODB_USER}}
+          MONGODB_HOST: ${{secrets.MONGODB_HOST}}
+          MONGODB_PWD: ${{secrets.MONGODB_PWD}}
+          MONGODB_DATABASE: ${{secrets.MONGODB_DATABASE}}
+          DEMO_USER_ID: ${{secrets.DEMO_USER_ID}}
+          DEMO_RESERVED_CLASS_ID: ${{secrets.DEMO_RESERVED_CLASS_ID}}
