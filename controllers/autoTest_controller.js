@@ -122,13 +122,13 @@ export const apiTest = async (req, res) => {
                 case: parsedTestCases[i].case,
                 url: targetUrl,
                 passed: true,
-                execStatus: testResult.status,
+                execStatus: JSON.stringify(testResult.status),
                 expectedStatus: parsedTestCases[i].statusCode,
-                execData: testResult.data,
+                execData: JSON.stringify(testResult.data),
                 expectedData: parsedTestCases[i].result
             }
 
-            if ( String(testResult.status) !== parsedTestCases[i].statusCode || testResult.data !== parsedTestCases[i].result ) {
+            if ( JSON.stringify(testResult.status) !== parsedTestCases[i].statusCode || JSON.stringify(testResult.data) !== parsedTestCases[i].result ) {
                 resultObj.passed = false;
                 allPassed = false;
             }
