@@ -21,7 +21,7 @@ jobs:
         run: npm install
       
       - name: Check directory contents
-        run: ls ../
+        run: ls ../Benocoding
 
       - name: Run JavaScript file
-        run: node ../demo/resetUser.js
+        run: node ../Benocoding/demo/resetUser.js
