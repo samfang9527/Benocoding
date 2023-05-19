@@ -19,6 +19,9 @@ jobs:
 
       - name: Install dependencies
         run: npm install
+      
+      - name: Check directory contents
+        run: ls /
 
       - name: Run JavaScript file
         run: node ../../demo/resetUser.js
