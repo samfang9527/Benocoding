@@ -6,7 +6,7 @@ import { userClassInfoSchema } from "./schemas/userClassInfoSchema.js";
 import { chatroomSchema } from "./schemas/chatroomSchema.js";
 import { orderSchema } from "./schemas/orderSchema.js";
 
-dotenv.config({path: "../.env"});
+dotenv.config();
 
 const user = process.env.MONGODB_USER;
 const host = process.env.MONGODB_HOST;

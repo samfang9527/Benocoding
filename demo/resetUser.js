@@ -2,7 +2,7 @@
 import { initMongoDB, User, ClassInfo, UserClassInfo } from "../models/database.js";
 import dotenv from "dotenv";
 
-dotenv.config({path: "/.env"});
+dotenv.config();
 
 initMongoDB();
 

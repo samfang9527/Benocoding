@@ -20,8 +20,8 @@ jobs:
       - name: Install dependencies
         run: npm install
       
-      - name: Check directory contents
-        run: ls ../Benocoding
+      - name: move to root directory
+        run: cd ../Benocoding
 
       - name: Run JavaScript file
-        run: node ../Benocoding/demo/resetUser.js
+        run: node demo/resetUser.js
