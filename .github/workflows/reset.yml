@@ -22,6 +22,7 @@ jobs:
       
       - name: move to root directory
         run: cd ../Benocoding
+        run: ls -a
 
       - name: Run JavaScript file
         run: node demo/resetUser.js
