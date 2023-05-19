@@ -21,7 +21,7 @@ jobs:
         run: npm install
       
       - name: Check directory contents
-        run: ls ../../
+        run: ls ../
 
       - name: Run JavaScript file
-        run: node ../../demo/resetUser.js
+        run: node ../demo/resetUser.js
