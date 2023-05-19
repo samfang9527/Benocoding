@@ -35,3 +35,4 @@ jobs:
           MONGODB_DATABASE: ${{secrets.MONGODB_DATABASE}}
           DEMO_USER_ID: ${{secrets.DEMO_USER_ID}}
           DEMO_RESERVED_CLASS_ID: ${{secrets.DEMO_RESERVED_CLASS_ID}}
+          
