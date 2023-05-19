@@ -1,9 +1,7 @@
 
 on:
-  push:
-    branches: [ release, autoResetDemoUser ]
-    schedule:
-      - cron: '0 * * * *' # update every 1 hours
+  schedule:
+    - cron: '0 * * * *' # update every 1 hours
 
 jobs:
   run-script:
