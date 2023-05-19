@@ -25,11 +25,17 @@ The idea was born out of my experience as a teaching assistant, where I discover
    * **Card expiration date: 04 / 24**
    * **Card CCV: 242**
 
+## Key features
+### 📌 function test  
+[![Demo](/public/images/Benocoding_functionTestDemo.gif)](https://youtu.be/3WlDRwV8xbI)
+### 📌 api test  
+[![Demo](/public/images/Benocoding_apiTestDemo.gif)](https://youtu.be/vJIF7_bwlkw)
+
 ## MongoDB schema
-![](/Benocoding_schema.png)
+![](/public/images/Benocoding_schema.png)
 
 ## Core techniques
-![](/Benocoding_structure.png)
+![](/public/images/Benocoding_structure.png)
 * **Scallable system**
   * Served front-end on AWS S3 and CloudFront to enhance the efficiency of website and make the server stateless
   * Integrated Socket.IO adapter with Redis to ensure the communication across distributed systems
