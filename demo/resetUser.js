@@ -53,6 +53,7 @@ async function runReset() {
     try {
         await Promise.all([clearCreatedClasses(), clearUserClassInfo(), resetUser()]);
         console.log("reset user done");
+        process.exit(0);
     } catch (error) {
         console.error(error);
     }
