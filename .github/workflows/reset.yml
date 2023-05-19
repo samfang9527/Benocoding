@@ -1,7 +1,7 @@
 
 on:
   schedule:
-    - cron: '0 * * * *' # update every 1 hours
+    - cron: '0 * * * *'
 
 jobs:
   run-script:
@@ -17,12 +17,6 @@ jobs:
 
       - name: Install dependencies
         run: npm install
-      
-      - name: move to root directory
-        run: cd ../Benocoding
-       
-      - name: check files
-        run: ls -a
 
       - name: Run JavaScript file
         run: node demo/resetUser.js
@@ -33,4 +27,4 @@ jobs:
           MONGODB_DATABASE: ${{secrets.MONGODB_DATABASE}}
           DEMO_USER_ID: ${{secrets.DEMO_USER_ID}}
           DEMO_RESERVED_CLASS_ID: ${{secrets.DEMO_RESERVED_CLASS_ID}}
-          
+        working-directory: ../Benocoding
