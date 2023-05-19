@@ -25,6 +25,9 @@ The idea was born out of my experience as a teaching assistant, where I discover
    * **Card expiration date: 04 / 24**
    * **Card CCV: 242**
 
+## MongoDB schema
+![](/Benocoding_schema.png)
+
 ## Core techniques
 ![](/Benocoding_structure.png)
 * **Scallable system**
