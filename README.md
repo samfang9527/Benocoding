@@ -5,10 +5,12 @@
 >**Benocoding (Being not just coding)**  
 
 ## What is Benocoding?
-* **An online course platform designed for coding.**  
-The idea was born out of my experience as a teaching assistant, where I discovered my passion for education while guiding students in learning Python. Inspired by this, I decided to construct an online platform where every individual can learn how to code.  
+* **An online course platform designed for coding**  
+The idea was born out of my experience as a teaching assistant, where I discovered my passion for education while guiding students in learning Python. Inspired by this, I decided to construct an online platform where every individual can learn how to code  
 
 ## How to use this website?
+
+**Website link: [https://benocoding.com](https://benocoding.com)**
 
 1. Either sign up with email or GitHub to become a user  
 2. Choose a role you want to be, a teacher or a student  
