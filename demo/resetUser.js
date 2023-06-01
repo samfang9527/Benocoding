@@ -49,9 +49,18 @@ async function resetUser() {
     }
 }
 
+// reset buying history
+async function resetBoughtHistory() {
+    try {
+        await ClassInfo.updateMany({}, {$pull: {classMembers: {userId: DEMO_USER_ID}}})
+    } catch (error) {
+        return error;
+    }
+}
+
 async function runReset() {
     try {
-        await Promise.all([clearCreatedClasses(), clearUserClassInfo(), resetUser()]);
+        await Promise.all([clearCreatedClasses(), clearUserClassInfo(), resetUser(), resetBoughtHistory()]);
         console.log("reset user done");
         process.exit(0);
     } catch (error) {
