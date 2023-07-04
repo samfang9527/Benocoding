@@ -44,6 +44,8 @@ The idea was born out of my experience as a teaching assistant, where I discover
 * **Stress testing and optimizing**
   * Based on the traffic of the Hahow and PressPlay online course platforms, simulate a scenario where 30,000 active users make requests to the API daily
   * Several strategies were attempted, and ultimately, Redis cache was chosen, successfully optimizing response speed by 400% while achieving the best cost efficiency
+* **CI/CD**
+  * Constructed CI/CD pipeline through GitHub Actions for automated code deployment and a cron job to refresh test user data.
 * **GraphQL**
   * Implemented API functionality with GraphQL to enhance the flexibility and efficiency of data retrieval and manipulation
 * **Third-party APIs**
