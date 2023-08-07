@@ -1,30 +1,30 @@
 
-on:
-  schedule:
-    - cron: '0 * * * *'
+# on:
+#   schedule:
+#     - cron: '0 * * * *'
 
-jobs:
-  run-script:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
+# jobs:
+#   run-script:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: Checkout repository
+#         uses: actions/checkout@v2
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: 18
+#       - name: Setup Node.js
+#         uses: actions/setup-node@v2
+#         with:
+#           node-version: 18
 
-      - name: Install dependencies
-        run: npm install
+#       - name: Install dependencies
+#         run: npm install
 
-      - name: Run JavaScript file
-        run: node demo/resetUser.js
-        env:
-          MONGODB_USER: ${{secrets.MONGODB_USER}}
-          MONGODB_HOST: ${{secrets.MONGODB_HOST}}
-          MONGODB_PWD: ${{secrets.MONGODB_PWD}}
-          MONGODB_DATABASE: ${{secrets.MONGODB_DATABASE}}
-          DEMO_USER_ID: ${{secrets.DEMO_USER_ID}}
-          DEMO_RESERVED_CLASS_ID: ${{secrets.DEMO_RESERVED_CLASS_ID}}
-        working-directory: ../Benocoding
+#       - name: Run JavaScript file
+#         run: node demo/resetUser.js
+#         env:
+#           MONGODB_USER: ${{secrets.MONGODB_USER}}
+#           MONGODB_HOST: ${{secrets.MONGODB_HOST}}
+#           MONGODB_PWD: ${{secrets.MONGODB_PWD}}
+#           MONGODB_DATABASE: ${{secrets.MONGODB_DATABASE}}
+#           DEMO_USER_ID: ${{secrets.DEMO_USER_ID}}
+#           DEMO_RESERVED_CLASS_ID: ${{secrets.DEMO_RESERVED_CLASS_ID}}
+#         working-directory: ../Benocoding
